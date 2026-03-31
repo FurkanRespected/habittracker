@@ -1,0 +1,456 @@
+.page {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 28px 16px;
+}
+
+.container {
+  width: 100%;
+  max-width: 920px;
+}
+
+.header {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 34px;
+  line-height: 1.12;
+  letter-spacing: -0.6px;
+  color: var(--title);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--muted);
+}
+
+.card {
+  background: linear-gradient(180deg, var(--surface), transparent);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.topBarLeft {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.authCard {
+  background: linear-gradient(180deg, var(--surface), transparent);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 16px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.authTitle {
+  margin: 0 0 8px;
+  font-size: 22px;
+  line-height: 1.15;
+  color: var(--title);
+}
+
+.authSubtitle {
+  margin: 0 0 14px;
+}
+
+.authForm {
+  display: grid;
+  gap: 10px;
+}
+
+.authLabel {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.authError {
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  background: rgba(248, 113, 113, 0.12);
+  color: rgba(254, 202, 202, 0.95);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.authSwitch {
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.textButton {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.textButton:hover {
+  text-decoration: underline;
+}
+
+.addHabit {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  outline: none;
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.input:focus {
+  border-color: rgba(124, 58, 237, 0.7);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.18);
+}
+
+.button {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.9), rgba(124, 58, 237, 0.72));
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+}
+
+.habitList {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.habitCard {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 14px 14px;
+}
+
+.habitTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.habitActions {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.habitTitleRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.habitName {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.2px;
+  color: var(--title);
+}
+
+.habitLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.habitLink:hover {
+  text-decoration: underline;
+}
+
+.detailTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.detailActions {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.daysGrid.daysGrid90 {
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+}
+
+.streakBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, var(--streak-border, 0.42));
+  background: rgba(251, 191, 36, var(--streak-bg, 0.14));
+  color: rgba(255, 251, 235, 0.98);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, var(--streak-glow, 0.08));
+}
+
+.streakIcon {
+  margin-right: 6px;
+  filter: saturate(1.1) contrast(1.05);
+}
+
+.habitBadges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.iconButton.iconOnly {
+  width: 38px;
+  padding: 8px 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chevron {
+  display: inline-block;
+  line-height: 1;
+  font-size: 18px;
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+.habitEdit {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  width: 100%;
+  align-items: center;
+}
+
+.habitEditInput {
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  outline: none;
+}
+
+.habitEditInput:focus {
+  border-color: rgba(124, 58, 237, 0.7);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.16);
+}
+
+.iconButton {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.86);
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.iconButton:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.iconButton:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 2px;
+}
+
+.iconButton.danger {
+  border-color: rgba(248, 113, 113, 0.35);
+  color: rgba(254, 202, 202, 0.95);
+}
+
+.iconButton.danger:hover {
+  background: rgba(248, 113, 113, 0.14);
+  border-color: rgba(248, 113, 113, 0.5);
+}
+
+.habitMeta {
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.pill b {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.daysGrid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dayCell {
+  position: relative;
+  display: grid;
+  gap: 3px;
+  align-items: center;
+  justify-items: center;
+  padding: 10px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  user-select: none;
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.dayCell:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.dayCell.isToday {
+  border-color: rgba(124, 58, 237, 0.55);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.14);
+}
+
+.dayCell.isChecked {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.dayDow {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dayDom {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: -0.2px;
+}
+
+.dayInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 14px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+@media (max-width: 520px) {
+  .title {
+    font-size: 28px;
+  }
+  .card {
+    padding: 14px;
+  }
+  .addHabit {
+    grid-template-columns: 1fr;
+  }
+  .habitTop {
+    align-items: flex-start;
+  }
+  .habitEdit {
+    grid-template-columns: 1fr;
+  }
+  .habitActions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .daysGrid {
+    gap: 6px;
+  }
+  .dayCell {
+    padding: 9px 6px;
+  }
+}
