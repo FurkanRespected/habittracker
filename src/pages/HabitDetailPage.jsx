@@ -33,88 +33,79 @@ export default function HabitDetailPage({ habits, onToggleDay }) {
 
   if (!habit) {
     return (
-      <main className="page">
-        <div className="container">
-          <section className="card">
-            <div className="empty">
-              Alışkanlık bulunamadı. <Link to="/">Geri dön</Link>
-            </div>
-          </section>
+      <div className="dashDetailPage">
+        <div className="dashEmpty">
+          Alışkanlık bulunamadı. <Link className="textButton" to="/">Geri dön</Link>
         </div>
-      </main>
+      </div>
     )
   }
 
   const canGoForward = weekShift > 0
 
   return (
-    <main className="page">
-      <div className="container">
-        <header className="header">
-          <div className="detailTop">
-            <Link className="textButton" to="/">
-              ← Geri
-            </Link>
-            <div className="detailActions">
-              <button
-                className="iconButton iconOnly"
-                type="button"
-                onClick={() => setWeekShift((v) => v + 7)}
-                aria-label="1 hafta geri"
-                title="1 hafta geri"
-              >
-                <span className="chevron" aria-hidden="true">
-                  ‹
-                </span>
-              </button>
-              <button
-                className="iconButton iconOnly"
-                type="button"
-                onClick={() => setWeekShift((v) => Math.max(0, v - 7))}
-                disabled={!canGoForward}
-                aria-label="1 hafta ileri"
-                title="1 hafta ileri"
-              >
-                <span className="chevron" aria-hidden="true">
-                  ›
-                </span>
-              </button>
-            </div>
+    <div className="dashDetailPage">
+      <header className="dashDetailHead">
+        <div className="dashDetailTop">
+          <Link className="textButton" to="/">
+            ← Geri
+          </Link>
+          <div className="detailActions">
+            <button
+              className="iconButton iconOnly"
+              type="button"
+              onClick={() => setWeekShift((v) => v + 7)}
+              aria-label="1 hafta geri"
+              title="1 hafta geri"
+            >
+              <span className="chevron" aria-hidden="true">
+                ‹
+              </span>
+            </button>
+            <button
+              className="iconButton iconOnly"
+              type="button"
+              onClick={() => setWeekShift((v) => Math.max(0, v - 7))}
+              disabled={!canGoForward}
+              aria-label="1 hafta ileri"
+              title="1 hafta ileri"
+            >
+              <span className="chevron" aria-hidden="true">
+                ›
+              </span>
+            </button>
           </div>
-          <h1 className="title">{habit.name}</h1>
-          <p className="subtitle">
-            Son 30 gün: <b>%{stats.last30.pct}</b> ({stats.last30.done}/{stats.last30.total}) · Son
-            90 gün: <b>%{stats.last90.pct}</b> ({stats.last90.done}/{stats.last90.total})
-          </p>
-        </header>
+        </div>
+        <h1 className="dashDetailTitle">{habit.name}</h1>
+        <p className="dashDetailSub">
+          Son 30 gün: <b>%{stats.last30.pct}</b> ({stats.last30.done}/{stats.last30.total}) · Son 90
+          gün: <b>%{stats.last90.pct}</b> ({stats.last90.done}/{stats.last90.total})
+        </p>
+      </header>
 
-        <section className="card">
-          <div className="daysGrid daysGrid90" role="group" aria-label="90 günlük görünüm">
-            {days.map((d) => {
-              const checked = Boolean(habit.history?.[d.key])
-              const isToday = d.key === todayKey
-              return (
-                <label
-                  key={d.key}
-                  className={`dayCell ${checked ? 'isChecked' : ''} ${
-                    isToday ? 'isToday' : ''
-                  }`}
-                  title={d.key}
-                >
-                  <span className="dayDow">{d.date.getDate()}</span>
-                  <input
-                    className="dayInput"
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => onToggleDay(habit.id, d.key, !checked)}
-                  />
-                </label>
-              )
-            })}
-          </div>
-        </section>
-      </div>
-    </main>
+      <section className="dashDetailCard">
+        <div className="daysGrid daysGrid90" role="group" aria-label="90 günlük görünüm">
+          {days.map((d) => {
+            const checked = Boolean(habit.history?.[d.key])
+            const isToday = d.key === todayKey
+            return (
+              <label
+                key={d.key}
+                className={`dayCell ${checked ? 'isChecked' : ''} ${isToday ? 'isToday' : ''}`}
+                title={d.key}
+              >
+                <span className="dayDow">{d.date.getDate()}</span>
+                <input
+                  className="dayInput"
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => onToggleDay(habit.id, d.key, !checked)}
+                />
+              </label>
+            )
+          })}
+        </div>
+      </section>
+    </div>
   )
 }
-

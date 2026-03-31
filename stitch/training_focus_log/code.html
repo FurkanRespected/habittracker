@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&amp;family=Space_Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-tint": "#ffb77d",
+              "on-secondary-fixed": "#0d1c2e",
+              "primary-container": "#d97707",
+              "primary-fixed-dim": "#ffb77d",
+              "on-primary-fixed": "#2f1500",
+              "inverse-on-surface": "#283044",
+              "surface": "#0b1326",
+              "secondary-container": "#3c4a5e",
+              "surface-container-lowest": "#060e20",
+              "on-secondary": "#233144",
+              "inverse-primary": "#904d00",
+              "secondary": "#b9c7df",
+              "on-primary": "#4d2600",
+              "on-primary-container": "#432100",
+              "inverse-surface": "#dae2fd",
+              "outline-variant": "#554336",
+              "error": "#ffb4ab",
+              "tertiary": "#b4c5ff",
+              "surface-variant": "#2d3449",
+              "on-tertiary-container": "#002469",
+              "secondary-fixed-dim": "#b9c7df",
+              "on-tertiary-fixed": "#00174b",
+              "on-error": "#690005",
+              "error-container": "#93000a",
+              "surface-container-highest": "#2d3449",
+              "surface-container-high": "#222a3d",
+              "on-error-container": "#ffdad6",
+              "surface-bright": "#31394d",
+              "surface-container-low": "#131b2e",
+              "on-secondary-fixed-variant": "#3a485b",
+              "primary": "#ffb77d",
+              "on-surface-variant": "#dbc2b0",
+              "tertiary-fixed": "#dbe1ff",
+              "outline": "#a38c7c",
+              "surface-container": "#171f33",
+              "on-surface": "#dae2fd",
+              "secondary-fixed": "#d5e3fc",
+              "on-background": "#dae2fd",
+              "background": "#0b1326",
+              "on-secondary-container": "#abb9d1",
+              "surface-dim": "#0b1326",
+              "on-primary-fixed-variant": "#6e3900",
+              "on-tertiary-fixed-variant": "#003ea8",
+              "primary-fixed": "#ffdcc3",
+              "on-tertiary": "#002a78",
+              "tertiary-container": "#618bff",
+              "tertiary-fixed-dim": "#b4c5ff"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Space_Grotesk"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary">
+<div class="flex min-h-screen">
+<!-- SideNavBar Component -->
+<aside class="h-screen w-64 left-0 sticky flex flex-col bg-[#0b1326] border-r border-slate-800/15 hidden md:flex shrink-0">
+<div class="p-8">
+<div class="text-amber-600 font-bold font-label text-sm tracking-widest uppercase">ELITE COMMANDER</div>
+<div class="text-slate-500 text-[10px] font-label tracking-[0.2em] mt-1">DISCIPLINE IS FREEDOM</div>
+</div>
+<nav class="flex-1 px-4 space-y-2">
+<a class="flex items-center gap-4 px-4 py-3 text-slate-500 font-label text-sm tracking-widest uppercase hover:text-slate-200 hover:bg-[#222a3d] transition-transform scale-95 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-slate-500 font-label text-sm tracking-widest uppercase hover:text-slate-200 hover:bg-[#222a3d] transition-transform scale-95 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span>Insights</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-slate-500 font-label text-sm tracking-widest uppercase hover:text-slate-200 hover:bg-[#222a3d] transition-transform scale-95 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span>Community</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-amber-500 font-bold bg-[#131b2e] font-label text-sm tracking-widest uppercase transition-transform scale-95 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+<span>Training</span>
+</a>
+</nav>
+<div class="px-6 py-8">
+<button class="w-full py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary font-bold font-label text-xs tracking-widest uppercase rounded-none hover:shadow-[0_0_20px_rgba(255,183,125,0.2)] transition-all">
+                    NEW HABIT
+                </button>
+</div>
+<div class="mt-auto border-t border-slate-800/15 p-4 space-y-1">
+<a class="flex items-center gap-4 px-4 py-2 text-slate-500 font-label text-xs tracking-widest uppercase hover:text-slate-200 hover:bg-[#222a3d] transition-transform scale-95 duration-200" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-2 text-slate-500 font-label text-xs tracking-widest uppercase hover:text-slate-200 hover:bg-[#222a3d] transition-transform scale-95 duration-200" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="logout">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0 bg-surface">
+<!-- TopNavBar Component -->
+<header class="w-full top-0 sticky z-30 bg-[#0b1326] backdrop-blur-md bg-opacity-60 flex justify-between items-center px-8 md:px-12 py-4">
+<div class="text-2xl font-black tracking-tighter text-amber-600 font-headline uppercase">MONOLITH</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex items-center gap-8">
+<span class="font-label text-xs tracking-widest text-slate-400 uppercase">System: Online</span>
+<span class="font-label text-xs tracking-widest text-slate-400 uppercase">Uptime: 142 Days</span>
+</div>
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="h-10 w-10 rounded-none bg-surface-container-high border border-outline-variant/20 flex items-center justify-center overflow-hidden">
+<img alt="Elite Commander" class="h-full w-full object-cover" data-alt="portrait of a focused professional athlete with intense expression and dramatic lighting on dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUyHPz33XytEPIKk2jnBANnZMbGgXgCByO7kVq2JjYPOBoix4sVb5HoHj7pPQrdU-cBkcvL5ErMigfyoIutXKWC9t4HNf3-wLnyu1OPeGWsAx6IfA2HQehnHPOK4LbHWqv529jyYHjcY2BlkFLsRcBUhY394p6b4t5glgNsZw8kqYkRBsd5fAZr34mPAFks4FAey0bBgTfKJlpNCuiIBmlHGjEaVpMzvRCacFD92clsum8qI2XlEzoBLsa4aHezS8PthU0zIT76L5l"/>
+</div>
+</div>
+</header>
+<!-- Scrollable Content -->
+<div class="p-8 md:p-12 space-y-12">
+<!-- Hero Header -->
+<section class="flex flex-col md:flex-row justify-between items-end gap-8">
+<div class="max-w-2xl">
+<h1 class="text-6xl md:text-8xl font-black font-headline tracking-tighter uppercase leading-none text-on-surface">
+                            TRAINING &amp; <br/><span class="text-primary">FOCUS</span>
+</h1>
+<p class="mt-6 text-on-surface-variant font-label text-sm tracking-widest uppercase max-w-md">
+                            The grind is non-negotiable. Track physical output and mental resilience with absolute precision.
+                        </p>
+</div>
+<div class="flex gap-4">
+<div class="bg-surface-container-low p-6 flex flex-col items-start min-w-[160px]">
+<span class="font-label text-[10px] tracking-[0.2em] text-slate-500 uppercase">Stoic Score</span>
+<span class="text-4xl font-black font-headline text-primary mt-2">88<span class="text-xs text-slate-500">/100</span></span>
+</div>
+<div class="bg-surface-container-low p-6 flex flex-col items-start min-w-[160px]">
+<span class="font-label text-[10px] tracking-[0.2em] text-slate-500 uppercase">Training Volume</span>
+<span class="text-4xl font-black font-headline text-on-surface mt-2">12.4<span class="text-xs text-slate-500">TONS</span></span>
+</div>
+</div>
+</section>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Training Log (Primary Section) -->
+<div class="lg:col-span-8 bg-surface-container-low p-8 border-l-4 border-primary">
+<div class="flex justify-between items-center mb-10">
+<div>
+<h2 class="text-2xl font-black font-headline tracking-tight uppercase">DAILY TRAINING LOG</h2>
+<p class="font-label text-[10px] text-slate-500 tracking-widest mt-1">SESSION: HEAVY PULL / POSTERIOR CHAIN</p>
+</div>
+<button class="p-2 bg-surface-container-high hover:bg-primary hover:text-on-primary transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+<!-- Workout Table -->
+<div class="space-y-8">
+<!-- Exercise Item -->
+<div class="group">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 bg-surface-container-lowest flex items-center justify-center font-black font-headline text-primary">01</div>
+<h3 class="font-black font-headline text-lg uppercase tracking-tight">Barbell Deadlift</h3>
+</div>
+<span class="font-label text-xs text-slate-500 tracking-widest">3 SETS • RPE 9</span>
+</div>
+<div class="grid grid-cols-4 gap-4">
+<div class="bg-surface-container-lowest p-4">
+<div class="font-label text-[9px] text-slate-500 tracking-widest uppercase">SET 1</div>
+<div class="mt-1 font-headline font-bold text-xl text-on-surface">140 KG <span class="text-xs text-slate-600">x5</span></div>
+</div>
+<div class="bg-surface-container-lowest p-4">
+<div class="font-label text-[9px] text-slate-500 tracking-widest uppercase">SET 2</div>
+<div class="mt-1 font-headline font-bold text-xl text-on-surface">140 KG <span class="text-xs text-slate-600">x5</span></div>
+</div>
+<div class="bg-surface-container-lowest p-4 border-b-2 border-primary-container">
+<div class="font-label text-[9px] text-slate-500 tracking-widest uppercase">SET 3</div>
+<div class="mt-1 font-headline font-bold text-xl text-on-surface">145 KG <span class="text-xs text-slate-600">x3</span></div>
+</div>
+<button class="bg-surface-container-highest flex items-center justify-center hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined text-slate-500" data-icon="history">history</span>
+</button>
+</div>
+</div>
+<!-- Exercise Item -->
+<div class="group">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 bg-surface-container-lowest flex items-center justify-center font-black font-headline text-primary">02</div>
+<h3 class="font-black font-headline text-lg uppercase tracking-tight">Weighted Pull-ups</h3>
+</div>
+<span class="font-label text-xs text-slate-500 tracking-widest">4 SETS • RPE 8</span>
+</div>
+<div class="grid grid-cols-4 gap-4">
+<div class="bg-surface-container-lowest p-4">
+<div class="font-label text-[9px] text-slate-500 tracking-widest uppercase">SET 1</div>
+<div class="mt-1 font-headline font-bold text-xl text-on-surface">20 KG <span class="text-xs text-slate-600">x8</span></div>
+</div>
+<div class="bg-surface-container-lowest p-4">
+<div class="font-label text-[9px] text-slate-500 tracking-widest uppercase">SET 2</div>
+<div class="mt-1 font-headline font-bold text-xl text-on-surface">20 KG <span class="text-xs text-slate-600">x8</span></div>
+</div>
+<div class="bg-surface-container-lowest p-4">
+<div class="font-label text-[9px] text-slate-500 tracking-widest uppercase">SET 3</div>
+<div class="mt-1 font-headline font-bold text-xl text-on-surface">20 KG <span class="text-xs text-slate-600">x6</span></div>
+</div>
+<div class="bg-surface-container-lowest p-4 border-b-2 border-outline-variant">
+<div class="font-label text-[9px] text-slate-500 tracking-widest uppercase">LOG SET</div>
+<div class="mt-1 font-headline font-bold text-xl text-slate-700 italic">PENDING</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Stoic Score Tracker (Side Section) -->
+<div class="lg:col-span-4 space-y-8">
+<!-- Stoic Score Card -->
+<div class="bg-surface-container-high p-8">
+<h2 class="text-xl font-black font-headline tracking-tight uppercase mb-6">STOIC ENDURANCE</h2>
+<div class="space-y-6">
+<div class="space-y-2">
+<div class="flex justify-between items-center font-label text-[10px] tracking-widest uppercase">
+<span>Deep Work Focus</span>
+<span class="text-primary">95%</span>
+</div>
+<div class="h-1 bg-surface-container-lowest">
+<div class="h-full bg-primary w-[95%]"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center font-label text-[10px] tracking-widest uppercase">
+<span>Emotional Control</span>
+<span class="text-primary">82%</span>
+</div>
+<div class="h-1 bg-surface-container-lowest">
+<div class="h-full bg-primary w-[82%]"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center font-label text-[10px] tracking-widest uppercase">
+<span>Adversity Resilience</span>
+<span class="text-primary">88%</span>
+</div>
+<div class="h-1 bg-surface-container-lowest">
+<div class="h-full bg-primary w-[88%]"></div>
+</div>
+</div>
+</div>
+<div class="mt-10 p-6 bg-surface-container-lowest border border-outline-variant/10">
+<span class="font-label text-[10px] tracking-[0.2em] text-slate-500 uppercase">Daily Reflection</span>
+<p class="mt-3 text-sm text-on-surface italic leading-relaxed">
+                                    "The impediment to action advances action. What stands in the way becomes the way."
+                                </p>
+</div>
+</div>
+<!-- Focus Session Control -->
+<div class="bg-surface-container-low p-8 relative overflow-hidden">
+<div class="relative z-10">
+<h2 class="text-xl font-black font-headline tracking-tight uppercase mb-2">FOCUS SESSION</h2>
+<p class="font-label text-[10px] text-slate-500 tracking-widest mb-8">ZERO DISTRACTION PROTOCOL</p>
+<div class="flex flex-col items-center gap-6">
+<div class="text-6xl font-black font-headline tracking-tighter">45:00</div>
+<button class="w-full py-4 bg-on-surface text-surface font-black font-label text-xs tracking-widest uppercase hover:bg-primary transition-colors">
+                                        START PROTOCOL
+                                    </button>
+</div>
+</div>
+<div class="absolute -right-8 -bottom-8 opacity-5">
+<span class="material-symbols-outlined text-[160px]" data-icon="timer">timer</span>
+</div>
+</div>
+</div>
+<!-- Weekly Visualization (Wide Section) -->
+<div class="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="bg-surface-container-low p-8 relative group">
+<img alt="Gym" class="absolute inset-0 w-full h-full object-cover opacity-10 filter grayscale group-hover:scale-110 transition-transform duration-700" data-alt="dramatic wide angle of a minimalist brutalist concrete gym interior with harsh overhead lighting and iron weights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxP30YXCXFYbP5KQq84_tg_avJQP_bHXHUBaenK6J64rrKIOoVZzMD4FCPblppOZU87IGKA1tq9PXl8ZUyjusIcm7KHfYaoS3AlPzRrrDLf6LykAOiF7V95WNE5h5Ca-N-6xxBhWsPv8HWFDXKqEkRIwDsYdfjQ8uVxzOFVi6nyDOW0PqZtnSWtdJjMeS5G59Qe7xOuQd-7A9Sg-BxRCDiTo71WnUvLEfXJz9S2M4UCGqnT398hXM_r9thoO2RhXRFe4iVSbcGjVY7"/>
+<div class="relative z-10">
+<span class="font-label text-[10px] tracking-widest text-primary uppercase">Training Volume Graph</span>
+<h3 class="text-3xl font-black font-headline uppercase mt-2 tracking-tighter">Hypertrophy<br/>Progress</h3>
+<div class="mt-8 flex items-end gap-2 h-20">
+<div class="w-full bg-primary/20 h-1/4"></div>
+<div class="w-full bg-primary/20 h-2/4"></div>
+<div class="w-full bg-primary h-3/4"></div>
+<div class="w-full bg-primary/20 h-2/5"></div>
+<div class="w-full bg-primary/20 h-3/5"></div>
+<div class="w-full bg-primary h-full"></div>
+<div class="w-full bg-primary/40 h-4/5"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-8">
+<span class="font-label text-[10px] tracking-widest text-primary uppercase">Mental Discipline</span>
+<h3 class="text-3xl font-black font-headline uppercase mt-2 tracking-tighter">Stoic<br/>Heatmap</h3>
+<div class="mt-8 grid grid-cols-7 gap-1">
+<!-- Minimalist Heatmap Grid -->
+<div class="aspect-square bg-primary-container"></div>
+<div class="aspect-square bg-primary"></div>
+<div class="aspect-square bg-surface-container-highest"></div>
+<div class="aspect-square bg-primary-container"></div>
+<div class="aspect-square bg-primary"></div>
+<div class="aspect-square bg-primary"></div>
+<div class="aspect-square bg-primary-container"></div>
+<div class="aspect-square bg-surface-container-highest"></div>
+<div class="aspect-square bg-primary-container"></div>
+<div class="aspect-square bg-primary"></div>
+<div class="aspect-square bg-surface-container-highest"></div>
+<div class="aspect-square bg-surface-container-highest"></div>
+<div class="aspect-square bg-primary"></div>
+<div class="aspect-square bg-primary-container"></div>
+<div class="aspect-square bg-primary"></div>
+<div class="aspect-square bg-primary-container"></div>
+<div class="aspect-square bg-primary"></div>
+<div class="aspect-square bg-surface-container-highest"></div>
+<div class="aspect-square bg-primary"></div>
+<div class="aspect-square bg-primary-container"></div>
+<div class="aspect-square bg-surface-container-highest"></div>
+</div>
+</div>
+<div class="bg-surface-container-low p-8 flex flex-col justify-between">
+<div>
+<span class="font-label text-[10px] tracking-widest text-primary uppercase">Command Console</span>
+<h3 class="text-3xl font-black font-headline uppercase mt-2 tracking-tighter">System<br/>Metrics</h3>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center border-b border-outline-variant/10 pb-2">
+<span class="font-label text-xs text-slate-500 uppercase">Avg Sleep</span>
+<span class="font-headline font-bold">7h 42m</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant/10 pb-2">
+<span class="font-label text-xs text-slate-500 uppercase">Protein Target</span>
+<span class="font-headline font-bold text-primary">185/200g</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label text-xs text-slate-500 uppercase">Active Streak</span>
+<span class="font-headline font-bold">42 Days</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Floating Action Trigger (Conditional) -->
+<button class="fixed bottom-12 right-12 h-16 w-16 bg-primary text-on-primary flex items-center justify-center shadow-2xl hover:scale-110 transition-transform z-50">
+<span class="material-symbols-outlined text-3xl font-bold" data-icon="add">add</span>
+</button>
+</body></html>

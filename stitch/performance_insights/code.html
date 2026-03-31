@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#D97706", // Amber 600
+              "on-primary": "#ffffff",
+              "background": "#060e20",
+              "surface": "#0b1326",
+              "surface-variant": "#131b2e",
+              "on-surface": "#f8fafc",
+              "on-surface-variant": "#94a3b8",
+              "outline": "#334155",
+              "outline-variant": "#1e293b",
+              "secondary": "#334155",
+              "tertiary": "#D97706",
+              "error": "#ef4444"
+            },
+            fontFamily: {
+              "headline": ["Inter", "sans-serif"],
+              "body": ["Inter", "sans-serif"],
+              "label": ["Space Grotesk", "sans-serif"]
+            },
+            borderRadius: {
+              "DEFAULT": "0px", 
+              "lg": "0px", 
+              "xl": "0px", 
+              "full": "0px"
+            },
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .heatmap-cell {
+            aspect-ratio: 1/1;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #060e20;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 0px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body antialiased selection:bg-primary selection:text-white">
+<!-- SideNavBar Shell (Integrated from COMPONENTS_8) -->
+<aside class="fixed left-0 top-0 bottom-0 w-64 bg-[#060e20] flex flex-col py-8 px-0 border-r border-white/5 z-50">
+<div class="px-6 mb-10">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-8 h-8 bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-xl">shield</span>
+</div>
+<h1 class="font-label text-xl font-black text-slate-100 tracking-widest">DISCIPLINE</h1>
+</div>
+<p class="text-[10px] font-label text-primary tracking-[0.2em] font-bold uppercase">STREAK: 14 DAYS</p>
+</div>
+<nav class="flex-1 flex flex-col">
+<a class="flex items-center gap-3 py-4 transition-all duration-200 text-slate-500 pl-4 hover:text-slate-200 hover:bg-[#131b2e] font-label text-xs uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 py-4 transition-all duration-200 text-orange-500 border-l-4 border-orange-600 pl-4 bg-[#131b2e] font-label text-xs uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Insights</span>
+</a>
+<a class="flex items-center gap-3 py-4 transition-all duration-200 text-slate-500 pl-4 hover:text-slate-200 hover:bg-[#131b2e] font-label text-xs uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span>Community</span>
+</a>
+<a class="flex items-center gap-3 py-4 transition-all duration-200 text-slate-500 pl-4 hover:text-slate-200 hover:bg-[#131b2e] font-label text-xs uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+<span>Training</span>
+</a>
+</nav>
+<div class="mt-auto px-6 space-y-4">
+<button class="w-full bg-primary text-on-primary py-4 px-4 font-bold text-xs tracking-widest uppercase hover:brightness-110 active:scale-95 transition-all">
+            LOG ACTIVITY
+        </button>
+<div class="pt-6 border-t border-white/5 space-y-2">
+<a class="flex items-center gap-3 py-2 text-slate-500 hover:text-slate-200 transition-colors font-label text-[10px] uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-3 py-2 text-slate-500 hover:text-slate-200 transition-colors font-label text-[10px] uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="logout">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- TopAppBar Shell (Integrated from COMPONENTS_8) -->
+<header class="fixed top-0 right-0 left-64 h-16 bg-[#0b1326] flex justify-between items-center px-8 z-40 border-b border-white/5">
+<div class="flex items-center gap-6">
+<span class="font-headline text-2xl font-black uppercase tracking-tighter text-slate-50">MONOLITH</span>
+<div class="h-6 w-[1px] bg-white/10"></div>
+<nav class="flex items-center gap-6">
+<span class="text-orange-500 font-bold text-sm tracking-tight">INSIGHTS</span>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-400 hover:bg-slate-800 transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+<div class="flex items-center gap-3 pl-6 border-l border-white/10">
+<div class="text-right">
+<p class="text-xs font-bold text-slate-50 uppercase tracking-tighter">Alex Rivera</p>
+<p class="text-[10px] text-primary font-bold uppercase tracking-widest">Elite Tier</p>
+</div>
+<div class="w-8 h-8 bg-slate-800 border border-white/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400">person</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 pb-12 px-8 min-h-screen">
+<div class="max-w-6xl mx-auto space-y-8">
+<!-- Hero Stats: Asymmetric Bento Grid -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Main Longest Streak -->
+<div class="col-span-12 md:col-span-7 bg-surface p-10 border border-white/5 relative overflow-hidden group">
+<div class="relative z-10">
+<p class="text-[10px] font-label text-primary mb-2 uppercase tracking-[0.3em] font-bold">LEGACY MILESTONE</p>
+<h2 class="font-headline text-6xl font-black text-on-surface leading-none mb-4">45 DAYS</h2>
+<p class="text-on-surface-variant text-sm max-w-[280px] leading-relaxed">Your highest sustained output recorded. Record set in July 2023.</p>
+</div>
+<div class="absolute right-10 bottom-10 w-40 h-40 opacity-20 group-hover:opacity-40 transition-opacity">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<circle class="text-white/10" cx="50" cy="50" fill="transparent" r="45" stroke="currentColor" stroke-width="2"></circle>
+<circle class="text-primary" cx="50" cy="50" fill="transparent" r="45" stroke="currentColor" stroke-dasharray="282.7" stroke-dashoffset="70.6" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-5xl" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+</div>
+</div>
+</div>
+<!-- Secondary Metric Cards -->
+<div class="col-span-12 md:col-span-5 grid grid-rows-2 gap-6">
+<div class="bg-surface-variant p-8 border border-white/5 flex items-center justify-between">
+<div>
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-[0.2em] font-bold mb-1">ACTIVE STREAK</p>
+<p class="font-headline text-4xl font-black text-on-surface">12 DAYS</p>
+</div>
+<span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+<div class="bg-surface-variant p-8 border border-white/5 flex items-center justify-between">
+<div>
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-[0.2em] font-bold mb-1">YEARLY FOCUS</p>
+<p class="font-headline text-4xl font-black text-on-surface">84%</p>
+</div>
+<span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+</div>
+</div>
+<!-- Discipline Heatmap -->
+<section class="bg-surface p-10 border border-white/5">
+<div class="flex justify-between items-center mb-10">
+<div>
+<h3 class="font-headline text-2xl font-black text-on-surface uppercase tracking-tighter">Discipline Heatmap</h3>
+<p class="text-xs text-on-surface-variant uppercase tracking-widest mt-1">Output consistency over the previous 12 months</p>
+</div>
+<div class="flex items-center gap-3 text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">
+<span>LOW</span>
+<div class="flex gap-1">
+<div class="w-3 h-3 bg-white/5"></div>
+<div class="w-3 h-3 bg-primary/20"></div>
+<div class="w-3 h-3 bg-primary/50"></div>
+<div class="w-3 h-3 bg-primary"></div>
+</div>
+<span>PEAK</span>
+</div>
+</div>
+<div class="overflow-x-auto pb-4">
+<div class="grid grid-flow-col grid-rows-7 gap-1.5 min-w-[800px]">
+<div class="row-span-7 pr-4 flex flex-col justify-between text-[10px] text-on-surface-variant font-bold uppercase py-1">
+<span>Mon</span>
+<span>Wed</span>
+<span>Fri</span>
+</div>
+<script>
+                        const container = document.currentScript.parentElement;
+                        const intensities = ['bg-white/5', 'bg-primary/20', 'bg-primary/50', 'bg-primary'];
+                        for(let i=0; i<364; i++){
+                            const div = document.createElement('div');
+                            const intensity = intensities[Math.floor(Math.random() * intensities.length)];
+                            div.className = `heatmap-cell w-3.5 h-3.5 ${intensity} transition-all hover:ring-1 hover:ring-white/50`;
+                            container.appendChild(div);
+                        }
+                    </script>
+</div>
+</div>
+</section>
+<!-- Bottom Row: Trends & Most Consistent Days -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Completion Trends -->
+<div class="bg-surface p-10 border border-white/5">
+<h3 class="font-headline text-xl font-black text-on-surface mb-8 uppercase tracking-tighter">Output Trends</h3>
+<div class="relative h-56 w-full flex items-end justify-between">
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-10">
+<div class="border-t border-white w-full"></div>
+<div class="border-t border-white w-full"></div>
+<div class="border-t border-white w-full"></div>
+<div class="border-t border-white w-full"></div>
+</div>
+<svg class="absolute inset-0 w-full h-full" preserveaspectratio="none" viewbox="0 0 100 100">
+<path class="text-primary" d="M 0 85 L 15 70 L 30 75 L 45 40 L 60 55 L 75 20 L 100 10" fill="none" stroke="currentColor" stroke-width="4"></path>
+<path d="M 0 85 L 15 70 L 30 75 L 45 40 L 60 55 L 75 20 L 100 10 V 100 H 0 Z" fill="url(#grad1)" opacity="0.1"></path>
+<defs>
+<lineargradient id="grad1" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#D97706;stop-opacity:1"></stop>
+<stop offset="100%" style="stop-color:#D97706;stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+</svg>
+<div class="absolute bottom-[-32px] left-0 right-0 flex justify-between text-[10px] text-on-surface-variant font-black uppercase tracking-widest">
+<span>MON</span>
+<span>TUE</span>
+<span>WED</span>
+<span>THU</span>
+<span>FRI</span>
+<span>SAT</span>
+<span>SUN</span>
+</div>
+</div>
+<div class="mt-16 flex items-center gap-3">
+<div class="w-3 h-3 bg-primary"></div>
+<span class="text-[10px] font-black text-on-surface uppercase tracking-widest">Aggregated Performance</span>
+</div>
+</div>
+<!-- Peak Productivity -->
+<div class="bg-surface p-10 border border-white/5">
+<h3 class="font-headline text-xl font-black text-on-surface mb-8 uppercase tracking-tighter">Peak Productivity</h3>
+<div class="space-y-6">
+<div class="group">
+<div class="flex justify-between text-xs mb-2 font-bold uppercase tracking-widest">
+<span class="text-on-surface">Wednesday</span>
+<span class="text-primary">98% COMPLIANCE</span>
+</div>
+<div class="h-2 w-full bg-white/5">
+<div class="h-full bg-primary w-[98%] transition-all group-hover:brightness-125"></div>
+</div>
+</div>
+<div class="group">
+<div class="flex justify-between text-xs mb-2 font-bold uppercase tracking-widest">
+<span class="text-on-surface">Monday</span>
+<span class="text-primary">84% COMPLIANCE</span>
+</div>
+<div class="h-2 w-full bg-white/5">
+<div class="h-full bg-primary w-[84%] transition-all group-hover:brightness-125"></div>
+</div>
+</div>
+<div class="group">
+<div class="flex justify-between text-xs mb-2 font-bold uppercase tracking-widest">
+<span class="text-on-surface">Thursday</span>
+<span class="text-primary">72% COMPLIANCE</span>
+</div>
+<div class="h-2 w-full bg-white/5">
+<div class="h-full bg-primary w-[72%] transition-all group-hover:brightness-125"></div>
+</div>
+</div>
+<div class="group">
+<div class="flex justify-between text-xs mb-2 font-bold uppercase tracking-widest">
+<span class="text-on-surface">Friday</span>
+<span class="text-primary">65% COMPLIANCE</span>
+</div>
+<div class="h-2 w-full bg-white/5">
+<div class="h-full bg-primary w-[65%] transition-all group-hover:brightness-125"></div>
+</div>
+</div>
+</div>
+<div class="mt-10 p-4 border border-primary/20 bg-primary/5">
+<p class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest leading-relaxed">
+<span class="text-primary">COMMAND:</span> YOUR FOCUS PEAKS MID-WEEK. ALLOCATE HIGH-STAKES TASKS TO <span class="text-on-surface">WEDNESDAY</span> 0800-1200HRS.
+                    </p>
+</div>
+</div>
+</div>
+<!-- Focus Insight Section: Elite Performer -->
+<div class="relative overflow-hidden min-h-[240px] flex items-center p-12 bg-black border border-primary/20">
+<div class="absolute inset-0 opacity-40">
+<img alt="abstract masculine discipline background" class="w-full h-full object-cover grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBisD0ORlc49JQjlm4LnURFUlY4hwgrnUGELC_r2xGxAeY3zWtfcJJtO-Qo24vwViLIThuSrKA5B0_p8A8kFb1D2DZpqFwPQ80kVmcC_vDYhrDs0anTzajBl0802eLXjwf7Qx50NZCH1MR6iVUhdQIMT1g49gLle76_vZOzML3m_CsicXV9c5uWZKZxlbCh4dqhe-Y8WlLfPxrt-S6pu017W_RfQWjTGaFegyQXvdJZFyPH3GCRk9AKzciRmWwdTBfHgV4nDT1uSstQ"/>
+<div class="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
+</div>
+<div class="relative z-10 max-w-xl">
+<div class="inline-block bg-primary text-black px-3 py-1 font-black text-[10px] uppercase tracking-[0.3em] mb-4">
+                    ELITE PERFORMER
+                </div>
+<h4 class="font-headline text-4xl font-black mb-4 uppercase tracking-tighter">IRON WILL</h4>
+<p class="text-slate-400 text-sm leading-relaxed mb-8 uppercase tracking-wider font-medium">
+                    124 DEEP WORK HOURS LOGGED IN THE LAST 30 DAYS. A 15% INCREASE IN VOLUME OVER PREVIOUS BASELINE. YOUR DISCIPLINE IS RADIATING.
+                </p>
+<button class="border border-primary text-primary px-10 py-4 font-black text-xs tracking-[0.2em] uppercase hover:bg-primary hover:text-black transition-all">
+                    GENERATE RECAP
+                </button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#D97706",
+              "on-primary": "#ffffff",
+              "background": "#060e20",
+              "surface": "#0b1326",
+              "surface-container": "#131b2e",
+              "on-surface": "#f8fafc",
+              "on-surface-variant": "#94a3b8",
+              "outline": "#334155",
+              "outline-variant": "#1e293b",
+              "error": "#ef4444"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Space Grotesk"]
+            },
+            borderRadius: {
+              "DEFAULT": "0.25rem",
+              "lg": "0.25rem",
+              "xl": "0.25rem",
+              "full": "9999px"
+            },
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .medal-glow {
+        filter: drop-shadow(0 0 12px rgba(217, 119, 6, 0.3));
+      }
+      .iron-border {
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface selection:bg-primary selection:text-on-primary">
+<!-- SideNavBar (Authority: JSON - Components_8) -->
+<aside class="fixed left-0 top-0 h-full w-64 flex flex-col bg-[#060e20] border-r border-white/5 z-50">
+<div class="py-8 px-6">
+<div class="mb-10 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings: 'FILL' 1;">shield</span>
+</div>
+<div>
+<h1 class="font-label text-xl font-black text-slate-100 tracking-widest uppercase">DISCIPLINE</h1>
+<p class="text-[10px] font-label font-bold uppercase tracking-[0.2em] text-primary mt-1">STREAK: 14 DAYS</p>
+</div>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 py-3 text-slate-500 font-label text-sm pl-4 hover:text-slate-200 hover:bg-[#131b2e] transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 py-3 text-slate-500 font-label text-sm pl-4 hover:text-slate-200 hover:bg-[#131b2e] transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Insights</span>
+</a>
+<a class="flex items-center gap-3 py-3 text-orange-500 border-l-4 border-orange-600 pl-4 bg-[#131b2e] font-label text-sm transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="groups" style="font-variation-settings: 'FILL' 1;">groups</span>
+<span>Community</span>
+</a>
+<a class="flex items-center gap-3 py-3 text-slate-500 font-label text-sm pl-4 hover:text-slate-200 hover:bg-[#131b2e] transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+<span>Training</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto py-8 px-6 space-y-1">
+<button class="w-full mb-6 py-3 px-4 bg-orange-600 text-white font-label font-bold text-xs tracking-widest hover:bg-orange-500 transition-colors">
+            LOG ACTIVITY
+        </button>
+<a class="flex items-center gap-3 py-2 text-slate-500 font-label text-xs pl-4 hover:text-slate-200 transition-all" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-3 py-2 text-slate-500 font-label text-xs pl-4 hover:text-slate-200 transition-all" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="logout">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</aside>
+<!-- TopAppBar (Authority: JSON - Components_8) -->
+<header class="fixed top-0 right-0 left-64 h-16 flex justify-between items-center px-8 z-40 bg-[#0b1326] border-b border-white/5">
+<div class="text-2xl font-black uppercase tracking-tighter text-slate-50 font-headline">MONOLITH</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-400 hover:bg-slate-800 transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-1.5 h-1.5 bg-orange-600 rounded-full"></span>
+</button>
+<button class="p-2 text-slate-400 hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+<div class="h-6 w-px bg-white/10"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-xs font-bold text-slate-100 uppercase tracking-wider">Alex Rivera</p>
+<p class="text-[10px] text-orange-500 font-bold uppercase tracking-tighter">ELITE COMMANDER</p>
+</div>
+<div class="w-10 h-10 bg-slate-800 border border-white/10 overflow-hidden">
+<img alt="User avatar" data-alt="Close-up portrait of a friendly young man with short dark hair smiling, soft natural lighting, modern minimalist background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsI9jWEO0yx4tHTxjduU-v7ZJt_V3GZCgBkiU4p7aUqkeCmAg8oLsGCAvBFgYz2cyb3X7LEq5NDQPfAGUN1S-LSZioPn6At4aeXLm8zsDqhIjnLMRyV2FPqBZ6eD0h2jpKzaC2lZbbyGlA5iKxWY0b8gcnmDmsjqk4vkt_83AnMYBeeaUGpKpyX8lrxKD56tykkFq9VkJJjgu-nlw3U29ifWms1MPtLkYKC27aBON0COrsLL9md-y8te9O-Pk9HEh5Tn8FeZMHUIgq"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-64 pt-24 px-8 pb-12 min-h-screen">
+<div class="max-w-7xl mx-auto grid grid-cols-12 gap-8">
+<!-- Medals Section -->
+<section class="col-span-8">
+<div class="flex justify-between items-end mb-10">
+<div>
+<span class="text-primary font-bold text-xs tracking-[0.3em] uppercase mb-2 block font-label">OPERATIONS RECORD</span>
+<h2 class="font-headline text-5xl font-black text-on-surface tracking-tighter uppercase">Medals of Honor</h2>
+</div>
+<div class="text-right">
+<p class="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest mb-1">UNITS SECURED</p>
+<p class="font-headline text-4xl font-black text-primary">12 <span class="text-slate-600 text-2xl font-medium">/ 48</span></p>
+</div>
+</div>
+<!-- Bento Grid for Badges -->
+<div class="grid grid-cols-3 gap-4">
+<!-- Featured Medal -->
+<div class="col-span-2 row-span-2 bg-surface-container iron-border p-10 flex flex-col justify-between relative overflow-hidden group">
+<div class="absolute -right-8 -top-8">
+<span class="material-symbols-outlined text-white/5 text-[160px] rotate-12">military_tech</span>
+</div>
+<div class="relative z-10">
+<div class="w-20 h-20 bg-primary flex items-center justify-center mb-8 medal-glow">
+<span class="material-symbols-outlined text-white text-4xl" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+</div>
+<h3 class="font-headline text-3xl font-black text-on-surface mb-3 uppercase tracking-tighter">Early Bird Master</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed max-w-sm font-medium">14 consecutive dawn operations logged. Discipline verified. No surrender to the snooze.</p>
+</div>
+<div class="mt-12 relative z-10">
+<div class="flex items-center justify-between mb-3">
+<span class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] font-label">MASTERY LEVEL 100%</span>
+<span class="text-[10px] text-on-surface-variant font-bold uppercase">Oct 24, 2023</span>
+</div>
+<div class="h-1 bg-white/5 w-full">
+<div class="w-full h-full bg-primary"></div>
+</div>
+</div>
+</div>
+<!-- Secondary Medals -->
+<div class="bg-surface p-6 iron-border flex flex-col items-center text-center group hover:bg-surface-container transition-colors duration-300">
+<div class="w-16 h-16 bg-white/5 flex items-center justify-center mb-4 text-primary">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">water_bottle</span>
+</div>
+<h4 class="font-headline text-sm font-black text-on-surface mb-2 uppercase tracking-widest">Hydration Ops</h4>
+<p class="text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">7-Day Supply Maintained</p>
+<div class="mt-auto pt-6 flex gap-2">
+<div class="w-2 h-2 bg-primary"></div>
+<div class="w-2 h-2 bg-primary"></div>
+<div class="w-2 h-2 bg-primary"></div>
+</div>
+</div>
+<div class="bg-surface p-6 iron-border flex flex-col items-center text-center group hover:bg-surface-container transition-colors duration-300">
+<div class="w-16 h-16 bg-white/5 flex items-center justify-center mb-4 text-primary">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<h4 class="font-headline text-sm font-black text-on-surface mb-2 uppercase tracking-widest">7-Day Surge</h4>
+<p class="text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">Momentum Protocol Active</p>
+<div class="mt-auto pt-6 flex gap-2">
+<div class="w-2 h-2 bg-primary"></div>
+<div class="w-2 h-2 bg-primary"></div>
+</div>
+</div>
+<!-- Locked Medals -->
+<div class="bg-transparent p-6 iron-border flex flex-col items-center text-center border-dashed border-white/10 opacity-30">
+<div class="w-16 h-16 border border-white/20 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-2xl">lock</span>
+</div>
+<h4 class="font-headline text-sm font-bold text-on-surface mb-1 uppercase">Iron Mind</h4>
+<p class="text-[10px] uppercase font-bold text-on-surface-variant">10 Meditations</p>
+</div>
+<div class="bg-transparent p-6 iron-border flex flex-col items-center text-center border-dashed border-white/10 opacity-30">
+<div class="w-16 h-16 border border-white/20 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-2xl">lock</span>
+</div>
+<h4 class="font-headline text-sm font-bold text-on-surface mb-1 uppercase">Titan Strength</h4>
+<p class="text-[10px] uppercase font-bold text-on-surface-variant">50k Reps</p>
+</div>
+<div class="bg-transparent p-6 iron-border flex flex-col items-center text-center border-dashed border-white/10 opacity-30">
+<div class="w-16 h-16 border border-white/20 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-2xl">lock</span>
+</div>
+<h4 class="font-headline text-sm font-bold text-on-surface mb-1 uppercase">Eternal Streak</h4>
+<p class="text-[10px] uppercase font-bold text-on-surface-variant">30 Day Lock</p>
+</div>
+</div>
+</section>
+<!-- Vanguard Sidebar -->
+<aside class="col-span-4 space-y-8">
+<!-- Leaderboard Card -->
+<div class="bg-surface iron-border p-6">
+<div class="flex items-center justify-between mb-8">
+<h3 class="font-headline text-lg font-black text-on-surface uppercase tracking-tighter">The Iron Brotherhood</h3>
+<span class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] border border-primary/30 px-2 py-1">RANKINGS</span>
+</div>
+<div class="space-y-3">
+<!-- Top 1 -->
+<div class="flex items-center gap-4 p-4 bg-primary/10 iron-border">
+<span class="font-headline text-xl font-black text-primary w-6">01</span>
+<div class="w-10 h-10 border border-primary overflow-hidden">
+<img alt="User avatar" data-alt="Portrait of a woman with a bright smile and glasses, studio lighting, professional and approachable look" src="https://lh3.googleusercontent.com/aida-public/AB6AXuArg1-FqvGPxA9hzRG4Azl28sAEsUwK8QCRcGl2IYt6MQy2cL7CyO9FApaz5IQdhvzaRXuqdluMWmgBi8MPox0PgnFpZXdM8SBkl2PLa2fm4xpbjgM2af6UloTHDliWvLseunSRPHnBngpHqD9ygqgqHCANtidTIB16dDMZjP8igceFxl13fhxjpTY028I_DM8zEttsc94NucSLeCqq-qGoVch3rwd6LpzDr86PhL_ueAsYrhW7jHePi6mjIKncxdujdBDU7hIPVyLa"/>
+</div>
+<div class="flex-1">
+<p class="text-xs font-black text-on-surface uppercase">Sarah Bloom</p>
+<p class="text-[10px] font-bold text-primary tracking-widest">9,420 XP</p>
+</div>
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<!-- Top 2 -->
+<div class="flex items-center gap-4 p-4 iron-border hover:bg-white/5 transition-colors">
+<span class="font-headline text-xl font-black text-slate-700 w-6">02</span>
+<div class="w-10 h-10 border border-white/10 overflow-hidden">
+<img alt="User avatar" data-alt="Portrait of a young man outdoors, natural cinematic lighting, soft background greenery" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNLFdt1mImYPSFxoNKP-vdr5hpgJV73B26_i9PUKxhrMvt48gy_zOrlGliV4YEyBerRft_spOy-GRBq4zBlCqXP99IBQxHceYrEzLYXcZzlrJEGY261HQSg2kAiVTuWye-V41nWI-h9hA7FqZvRlUG6XjD-8APISFQGBmpwui-3nWwUFjlXKMExkk6O71yHB-xMCzqXld14Rd3uEpmyQI5tUIx8PoDxn2lW5rUNoMWTyzVJQU8oEJwUqw1UYNN2ZghiJVs3L7pE9Yu"/>
+</div>
+<div class="flex-1">
+<p class="text-xs font-black text-on-surface uppercase">David Miller</p>
+<p class="text-[10px] font-bold text-on-surface-variant tracking-widest">8,150 XP</p>
+</div>
+</div>
+<!-- Top 3 -->
+<div class="flex items-center gap-4 p-4 iron-border hover:bg-white/5 transition-colors">
+<span class="font-headline text-xl font-black text-slate-700 w-6">03</span>
+<div class="w-10 h-10 border border-white/10 overflow-hidden">
+<img alt="User avatar" data-alt="Professional woman with a confident expression, neutral office background, clean modern lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWB88Ub1PBHgGrHQ14Hfl0QaIRyGhBBA9PMPlj121SWoWLURzJ3a_bOl3wAHpHP79iIVy-Cr9EMZ1-CSnZqhZg4PJhbtNrPgOEsVzZQfP6_LtS4nW-lXBZpqKAz12oBLCw0pzG36FloOSGfp577sAQnwETTLt1HP6E8yGMdNHlLeZZZ_LLSH5Bnk3TE7QRyUM22D_GX5yDYv2Ct-w0NBR3AZDrfQ6zVGLcTa98I7rYUptxt5LOdhxlYhXiEueQUIwUu5-s4tvzD6vC"/>
+</div>
+<div class="flex-1">
+<p class="text-xs font-black text-on-surface uppercase">Elena K.</p>
+<p class="text-[10px] font-bold text-on-surface-variant tracking-widest">7,900 XP</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-3 text-[10px] font-black text-primary uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all">VIEW FULL ROSTER</button>
+</div>
+<!-- Feed Card -->
+<div class="bg-surface iron-border p-6">
+<h3 class="font-headline text-lg font-black text-on-surface uppercase tracking-tighter mb-8">Intelligence Feed</h3>
+<div class="space-y-8 relative before:absolute before:left-[19px] before:top-2 before:bottom-2 before:w-[1px] before:bg-white/5">
+<div class="flex gap-4 relative">
+<div class="w-10 h-10 bg-primary flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+</div>
+<div>
+<p class="text-xs text-on-surface leading-snug"><span class="font-black uppercase">YOU</span> secured <span class="text-primary font-black">Deep Sleeper</span> medal.</p>
+<p class="text-[10px] text-on-surface-variant font-bold uppercase mt-1">02:00 HRS AGO</p>
+</div>
+</div>
+<div class="flex gap-4 relative">
+<div class="w-10 h-10 bg-slate-800 flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-orange-500 text-sm" style="font-variation-settings: 'FILL' 1;">handshake</span>
+</div>
+<div>
+<p class="text-xs text-on-surface leading-snug"><span class="font-black uppercase">Marcus</span> acknowledged your discipline.</p>
+<p class="text-[10px] text-on-surface-variant font-bold uppercase mt-1">05:00 HRS AGO</p>
+</div>
+</div>
+<div class="flex gap-4 relative">
+<div class="w-10 h-10 bg-slate-800 flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-orange-500 text-sm" style="font-variation-settings: 'FILL' 1;">groups</span>
+</div>
+<div>
+<p class="text-xs text-on-surface leading-snug"><span class="font-black uppercase">Cohort 4</span> achieved <span class="font-black">1k Combined Hours</span>.</p>
+<p class="text-[10px] text-on-surface-variant font-bold uppercase mt-1">24:00 HRS AGO</p>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-8 right-8 w-16 h-16 bg-primary text-white shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-200 z-50">
+<span class="material-symbols-outlined text-3xl">terminal</span>
+</button>
+</body></html>

@@ -31,6 +31,7 @@ create unique index if not exists habit_checks_unique
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();

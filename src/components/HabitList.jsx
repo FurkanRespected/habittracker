@@ -7,7 +7,7 @@ export default function HabitList({
   onRenameHabit,
 }) {
   return (
-    <div className="habitList">
+    <div className="protocolList">
       {habits.map((h) => (
         <HabitItem
           key={h.id}

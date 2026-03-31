@@ -1,20 +1,21 @@
-import { useMemo } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import './App.css'
+import './monolith.css'
+import AppShell from './components/AppShell.jsx'
 import AuthForm from './components/AuthForm.jsx'
 import useLocalStorage from './hooks/useLocalStorage.js'
 import useCloudHabits from './hooks/useCloudHabits.js'
 import useSupabaseSession from './hooks/useSupabaseSession.js'
 import { supabase } from './lib/supabaseClient.js'
+import ComingSoonPage from './pages/ComingSoonPage.jsx'
 import HabitDetailPage from './pages/HabitDetailPage.jsx'
 import HomePage from './pages/HomePage.jsx'
+import { maxStreakAcrossHabits } from './utils/dashboardUtils.js'
 
 function App() {
   const [habits, setHabits] = useLocalStorage('habits', [])
   const { session, loading, enabled } = useSupabaseSession()
   const cloud = useCloudHabits({ session, checksLookbackDays: 400 })
-
-  const hasHabits = habits.length > 0
 
   async function signOut() {
     await supabase?.auth?.signOut?.()
@@ -51,98 +52,125 @@ function App() {
   }
 
   const activeHabits = enabled && session ? cloud.habits : habits
+  const streakMax = maxStreakAcrossHabits(activeHabits)
   const activeHasHabits = activeHabits.length > 0
-  const activeSubtitle = useMemo(() => {
-    if (activeHasHabits) return 'Bugün hangilerini yaptın?'
-    return 'Günlük alışkanlıklarını takip et. İlk alışkanlığını ekleyerek başla.'
-  }, [activeHasHabits])
 
-  const authedTopBar = session ? (
-    <div className="topBar">
-      <div className="topBarLeft muted">{session.user.email}</div>
-      <button className="iconButton" type="button" onClick={signOut}>
-        Çıkış
-      </button>
-    </div>
-  ) : null
+  function logActivity() {
+    document.getElementById('protocol-add')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  if (enabled && loading) {
+    return (
+      <div className="shellBoot">
+        <p>Oturum açılıyor...</p>
+      </div>
+    )
+  }
+
+  if (enabled && !session) {
+    return (
+      <Routes>
+        <Route
+          path="*"
+          element={
+            <main className="authPage">
+              <AuthForm />
+            </main>
+          }
+        />
+      </Routes>
+    )
+  }
+
+  const userLabel =
+    enabled && session ? (session.user.email ?? 'Hesap') : 'Yerel kayıt'
+
+  const shellProps = {
+    streakDays: streakMax,
+    userLabel,
+    onSignOut: enabled && session ? signOut : undefined,
+    onLogActivity: logActivity,
+  }
+
+  const homeHandlers =
+    enabled && session
+      ? {
+          onAddHabit: cloud.addHabit,
+          onToggleDay: cloud.toggleHabitDay,
+          onDeleteHabit: cloud.deleteHabit,
+          onRenameHabit: cloud.renameHabit,
+          loading: cloud.loading,
+          error: cloud.error,
+        }
+      : {
+          onAddHabit: addHabit,
+          onToggleDay: toggleHabitDay,
+          onDeleteHabit: deleteHabit,
+          onRenameHabit: renameHabit,
+          loading: false,
+          error: '',
+        }
 
   return (
     <Routes>
       <Route
         path="/"
         element={
-          enabled ? (
-            loading ? (
-              <HomePage
-                subtitle={activeSubtitle}
-                habits={[]}
-                hasHabits={false}
-                emptyHint=""
-                onAddHabit={() => {}}
-                onToggleDay={() => {}}
-                onDeleteHabit={() => {}}
-                onRenameHabit={() => {}}
-                loading={true}
-                error=""
-              />
-            ) : session ? (
-              <HomePage
-                subtitle={activeSubtitle}
-                topBar={authedTopBar}
-                habits={activeHabits}
-                hasHabits={activeHasHabits}
-                emptyHint="İlkini ekleyebilirsin."
-                onAddHabit={cloud.addHabit}
-                onToggleDay={cloud.toggleHabitDay}
-                onDeleteHabit={cloud.deleteHabit}
-                onRenameHabit={cloud.renameHabit}
-                loading={cloud.loading}
-                error={cloud.error}
-              />
-            ) : (
-              <main className="page">
-                <div className="container">
-                  <AuthForm />
-                </div>
-              </main>
-            )
-          ) : (
+          <AppShell {...shellProps}>
+            {!enabled ? (
+              <div className="dashEmpty" style={{ marginBottom: '1rem' }}>
+                Supabase ayarları yok. Şimdilik yerel kayıt ile devam ediyorsun.
+                <span className="dashMuted"> Senkron için `.env` ayarla.</span>
+              </div>
+            ) : null}
             <HomePage
-              subtitle={activeSubtitle}
-              habits={habits}
-              hasHabits={hasHabits}
+              habits={activeHabits}
+              hasHabits={activeHasHabits}
               emptyHint="İlkini ekleyebilirsin."
-              onAddHabit={addHabit}
-              onToggleDay={toggleHabitDay}
-              onDeleteHabit={deleteHabit}
-              onRenameHabit={renameHabit}
-              loading={false}
-              error=""
-              topBar={
-                <div className="empty" style={{ marginBottom: 12 }}>
-                  Supabase ayarları yok. Şimdilik local kayıt ile devam ediyorsun.
-                  <span className="muted"> Senkron için `.env` ayarla.</span>
-                </div>
-              }
+              maxStreakDays={streakMax}
+              {...homeHandlers}
             />
-          )
+          </AppShell>
         }
       />
-
+      <Route
+        path="/insights"
+        element={
+          <AppShell {...shellProps}>
+            <ComingSoonPage
+              title="INSIGHTS"
+              subtitle="Performans özeti ve heatmap yakında."
+            />
+          </AppShell>
+        }
+      />
+      <Route
+        path="/community"
+        element={
+          <AppShell {...shellProps}>
+            <ComingSoonPage title="COMMUNITY" subtitle="Topluluk özellikleri yakında." />
+          </AppShell>
+        }
+      />
+      <Route
+        path="/training"
+        element={
+          <AppShell {...shellProps}>
+            <ComingSoonPage title="TRAINING" subtitle="Antrenman modülü yakında." />
+          </AppShell>
+        }
+      />
       <Route
         path="/habit/:id"
         element={
-          enabled && !loading && !session ? (
-            <Navigate to="/" replace />
-          ) : (
+          <AppShell {...shellProps}>
             <HabitDetailPage
               habits={activeHabits}
               onToggleDay={enabled && session ? cloud.toggleHabitDay : toggleHabitDay}
             />
-          )
+          </AppShell>
         }
       />
-
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
