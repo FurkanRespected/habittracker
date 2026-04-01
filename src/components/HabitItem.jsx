@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { protocolIconLetter } from '../utils/dashboardUtils.js'
+import { protocolIconLetter, protocolStitchIcon } from '../utils/dashboardUtils.js'
 import { addDays, getLastNDays, getTrWeekdayShort, toDateKey } from '../utils/dateUtils.js'
 
 function getCurrentStreak(history) {
@@ -19,6 +19,7 @@ export default function HabitItem({
   onToggleDay,
   onDeleteHabit,
   onRenameHabit,
+  stitchLayout = false,
 }) {
   const todayKey = toDateKey(new Date())
   const todayDone = Boolean(habit.history?.[todayKey])
@@ -35,6 +36,8 @@ export default function HabitItem({
     const endDate = addDays(new Date(), -weekShift)
     return getLastNDays(14, endDate)
   }, [weekShift])
+
+  const stitchIcon = useMemo(() => protocolStitchIcon(habit.id), [habit.id])
 
   const streakStrength = Math.max(0, Math.min(1, stats.currentStreak / 14))
   const streakStyle = useMemo(() => {
@@ -71,7 +74,64 @@ export default function HabitItem({
   }
 
   const canGoForward = weekShift > 0
-  const letter = protocolIconLetter(habit.name)
+
+  if (stitchLayout && !isEditing) {
+    return (
+      <article className={`protocolStitch ${todayDone ? 'protocolStitchDone' : ''}`}>
+        <div className="protocolStitchMain">
+          <div className="protocolStitchLeft">
+            <div className={`protocolStitchIcon ${todayDone ? 'isProtocolDone' : ''}`} aria-hidden="true">
+              <span
+                className="material-symbols-outlined protocolStitchIconSym"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                {stitchIcon}
+              </span>
+            </div>
+            <div className="protocolStitchInfo">
+              <Link className="protocolStitchTitle" to={`/habit/${habit.id}`}>
+                {habit.name}
+              </Link>
+              <p className="protocolStitchMeta">Günlük · Hemen</p>
+            </div>
+          </div>
+          <div className="protocolStitchRight">
+            <div className="protocolStitchCons">
+              <span className="protocolStitchConsLbl">Tutarlılık</span>
+              <span className="protocolStitchConsVal">{stats.currentStreak} GÜN</span>
+            </div>
+            <div className="protocolStitchTools">
+              <button type="button" className="protocolStitchTool" onClick={startEdit} title="Düzenle">
+                <span className="material-symbols-outlined">edit</span>
+              </button>
+              <button
+                type="button"
+                className="protocolStitchTool protocolStitchToolDanger"
+                onClick={requestDelete}
+                title="Sil"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <button
+              type="button"
+              className={`protocolStitchCheck ${todayDone ? 'isOn' : ''}`}
+              onClick={() => onToggleDay(habit.id, todayKey, !todayDone)}
+              aria-label={todayDone ? 'Bugünkü işareti kaldır' : 'Bugün tamamlandı'}
+            >
+              {todayDone ? (
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  done_all
+                </span>
+              ) : (
+                <span className="material-symbols-outlined">check</span>
+              )}
+            </button>
+          </div>
+        </div>
+      </article>
+    )
+  }
 
   return (
     <article className={`protocolCard ${todayDone ? 'protocolCardDone' : ''}`}>
@@ -94,7 +154,7 @@ export default function HabitItem({
         <>
           <div className="protocolRow">
             <div className="protocolIcon" aria-hidden="true">
-              {letter}
+              {protocolIconLetter(habit.name)}
             </div>
             <div className="protocolInfo">
               <Link className="protocolTitle" to={`/habit/${habit.id}`}>

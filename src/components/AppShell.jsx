@@ -1,9 +1,9 @@
 import { NavLink, useLocation } from 'react-router-dom'
 
 const CRUMB = {
-  '/insights': 'INSIGHTS',
-  '/community': 'COMMUNITY',
-  '/training': 'TRAINING',
+  '/insights': 'İÇGÖRÜLER',
+  '/community': 'TOPLULUK',
+  '/training': 'ANTRENMAN',
   '/mission': 'GÖREV',
 }
 
@@ -56,17 +56,17 @@ export default function AppShell({
           <p className="shellStreakLabel">Seri: {streakDays} gün</p>
         </div>
         <nav className="shellNav">
-          <NavItem to="/" icon="grid_view" label="Dashboard" />
-          <NavItem to="/insights" icon="analytics" label="Insights" />
-          <NavItem to="/community" icon="groups" label="Community" />
-          <NavItem to="/training" icon="fitness_center" label="Training" />
+          <NavItem to="/" icon="grid_view" label="Panel" />
+          <NavItem to="/insights" icon="analytics" label="İçgörüler" />
+          <NavItem to="/community" icon="groups" label="Topluluk" />
+          <NavItem to="/training" icon="fitness_center" label="Antrenman" />
         </nav>
         <div className="shellAsideFooter">
           <button type="button" className="shellCta" onClick={onLogActivity}>
             <span className="material-symbols-outlined shellCtaIco" aria-hidden="true">
               add
             </span>
-            <span>Log Activity</span>
+            <span>Aktivite kaydet</span>
           </button>
           <div className="shellFooterLinks">
             <button type="button" className="shellFooterBtn shellFooterBtnWithIco">

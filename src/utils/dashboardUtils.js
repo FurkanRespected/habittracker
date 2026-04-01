@@ -39,6 +39,24 @@ export function buildMergedHeatmap(habits, totalDays = 56) {
   return cells
 }
 
+const STITCH_PROTOCOL_ICONS = [
+  'opacity',
+  'psychology',
+  'menu_book',
+  'fitness_center',
+  'water_drop',
+  'bedtime',
+  'self_improvement',
+  'restaurant',
+]
+
+export function protocolStitchIcon(seed) {
+  const s = String(seed ?? '')
+  let h = 0
+  for (let i = 0; i < s.length; i++) h = (h + s.charCodeAt(i) * (i + 1)) % 1009
+  return STITCH_PROTOCOL_ICONS[h % STITCH_PROTOCOL_ICONS.length]
+}
+
 export function protocolIconLetter(name) {
   const t = (name || '?').trim()
   return t.slice(0, 1).toUpperCase()

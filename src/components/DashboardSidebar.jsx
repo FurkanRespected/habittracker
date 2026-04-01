@@ -61,7 +61,7 @@ export function ProtocolCompletionCard({ habits }) {
 }
 
 export function ExecutionHeatmapCard({ habits }) {
-  const cells = buildMergedHeatmap(habits, 56)
+  const cells = buildMergedHeatmap(habits, 14)
 
   return (
     <div className="dashCard dashCardPad">
