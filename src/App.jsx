@@ -6,6 +6,8 @@ import AppShell from './components/AppShell.jsx'
 import AuthForm from './components/AuthForm.jsx'
 import useLocalStorage from './hooks/useLocalStorage.js'
 import useCloudHabits from './hooks/useCloudHabits.js'
+import useCloudNutrition from './hooks/useCloudNutrition.js'
+import useCloudSupplements from './hooks/useCloudSupplements.js'
 import useSupabaseSession from './hooks/useSupabaseSession.js'
 import { supabase } from './lib/supabaseClient.js'
 import CommunityPage from './pages/CommunityPage.jsx'
@@ -21,6 +23,8 @@ function App() {
   const [habits, setHabits] = useLocalStorage('habits', [])
   const { session, loading, enabled } = useSupabaseSession()
   const cloud = useCloudHabits({ session, checksLookbackDays: 400 })
+  const cloudSupplements = useCloudSupplements({ session, logsLookbackDays: 30 })
+  const cloudNutrition = useCloudNutrition({ session, lookbackDays: 30 })
 
   async function signOut() {
     await supabase?.auth?.signOut?.()
@@ -160,7 +164,11 @@ function App() {
         path="/training"
         element={
           <AppShell {...shellProps}>
-            <TrainingPage habits={activeHabits} />
+            <TrainingPage
+              habits={activeHabits}
+              supplementsApi={enabled && session ? cloudSupplements : null}
+              nutritionApi={enabled && session ? cloudNutrition : null}
+            />
           </AppShell>
         }
       />

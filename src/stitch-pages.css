@@ -1674,6 +1674,361 @@
   font-size: 1.75rem !important;
 }
 
+/* Training modules: tabs + supplements + nutrition */
+.trTabs {
+  display: flex;
+  gap: 0.75rem;
+  margin: -0.5rem 0 1.5rem;
+  flex-wrap: wrap;
+}
+
+.trTab {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--dash-surface-low);
+  color: #cbd5e1;
+  padding: 0.75rem 1rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.trTabOn {
+  border-color: rgba(249, 115, 22, 0.9);
+  background: rgba(249, 115, 22, 0.12);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.35);
+}
+
+.supPage,
+.nutPage {
+  background: var(--dash-surface);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.supTop,
+.nutTop {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.supTitle,
+.nutTitle {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-size: 1.25rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: #f8fafc;
+}
+
+.supSub,
+.nutSub {
+  margin: 0.35rem 0 0;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.supAdd {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .supAdd {
+    grid-template-columns: 2.2fr 1fr 1fr 1fr 0.6fr 1fr auto;
+    align-items: center;
+  }
+}
+
+.supInput,
+.nutInput,
+.nutTextarea {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--dash-bg-deep);
+  color: #e2e8f0;
+  padding: 0.85rem 0.9rem;
+  outline: none;
+}
+
+.supInput::placeholder,
+.nutInput::placeholder,
+.nutTextarea::placeholder {
+  color: rgba(148, 163, 184, 0.65);
+}
+
+.supSmall {
+  min-width: 9rem;
+}
+
+.supTiny {
+  min-width: 5rem;
+}
+
+.supBtn,
+.nutBtn,
+.nutNavBtn {
+  border: 1px solid rgba(249, 115, 22, 0.65);
+  background: rgba(249, 115, 22, 0.12);
+  color: #fff;
+  padding: 0.85rem 1rem;
+  font-weight: 900;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.supBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.supErr,
+.nutErr {
+  margin: 0 0 1rem;
+  padding: 0.9rem 1rem;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #fecaca;
+  font-size: 0.85rem;
+}
+
+.supGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .supGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .supGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.supCard {
+  background: var(--dash-surface-low);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.supCardHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.supName {
+  font-family: var(--font-headline);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: #f8fafc;
+}
+
+.supMeta {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.supIconBtn {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: #cbd5e1;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.supDanger {
+  border-color: rgba(239, 68, 68, 0.35);
+  color: rgba(248, 113, 113, 0.95);
+}
+
+.supQuick {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.supQuickBtn,
+.supQuickBtnGhost {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--dash-bg-deep);
+  color: #e2e8f0;
+  padding: 0.6rem 0.75rem;
+  font-weight: 900;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.supQuickBtnGhost {
+  border-color: rgba(249, 115, 22, 0.35);
+  color: #fff;
+}
+
+.supRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.supRowLbl {
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.supRowVal {
+  font-family: var(--font-headline);
+  font-weight: 900;
+  color: #f8fafc;
+}
+
+.supFoot {
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.supFootLbl {
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.supStreak {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.supDay {
+  width: 0.9rem;
+  height: 0.9rem;
+  background: rgba(148, 163, 184, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.supDayOn {
+  background: rgba(249, 115, 22, 0.22);
+  border-color: rgba(249, 115, 22, 0.7);
+}
+
+.nutNav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.nutCard {
+  background: var(--dash-surface-low);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 1.25rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.nutLbl {
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.nutToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #cbd5e1;
+}
+
+.nutGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .nutGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.nutTextarea {
+  min-height: 6.5rem;
+  resize: vertical;
+}
+
+.nutActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.nutTrend {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.nutTrendLbl {
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.nutBars {
+  height: 5.5rem;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.4rem;
+  align-items: end;
+}
+
+.nutBar {
+  width: 100%;
+  background: rgba(249, 115, 22, 0.16);
+  border: 1px solid rgba(249, 115, 22, 0.35);
+}
+
 /* ——— Mission ——— */
 .misWrap {
   min-height: calc(100svh - 8rem);
