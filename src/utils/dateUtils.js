@@ -21,6 +21,19 @@ export function addDays(date, days) {
   return next
 }
 
+/** Yerel takvimde haftayı Pazartesi başlatır (Pzt…Paz). */
+export function startOfLocalWeekMonday(date = new Date()) {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const day = d.getDay() // 0=Paz … 6=Cmt
+  const daysFromMonday = day === 0 ? 6 : day - 1
+  d.setDate(d.getDate() - daysFromMonday)
+  return d
+}
+
+export function toMondayOfWeekDateKey(date = new Date()) {
+  return toDateKey(startOfLocalWeekMonday(date))
+}
+
 // Returns array from oldest -> newest (today last)
 export function getLastNDays(n, baseDate = new Date()) {
   const start = addDays(baseDate, -(n - 1))

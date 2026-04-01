@@ -1,7 +1,29 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useLocalStorage from '../hooks/useLocalStorage.js'
-import { maxStreakAcrossHabits } from '../utils/dashboardUtils.js'
-import { addDays, toDateKey } from '../utils/dateUtils.js'
+import { maxStreakAcrossHabits, protocolStitchIcon } from '../utils/dashboardUtils.js'
+import {
+  addDays,
+  fromDateKey,
+  getLastNDays,
+  getTrWeekdayShort,
+  toDateKey,
+  toMondayOfWeekDateKey,
+} from '../utils/dateUtils.js'
+import {
+  INTAKE_DOW_OPTIONS,
+  INTAKE_MODE,
+  buildIntakeScheduleDbFields,
+  normalizeCustomDays,
+} from '../utils/supplementIntakeScheduleUtils.js'
+
+function startOfCalendarDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+}
+
+function weekStripCanShiftNext(stripEndDate) {
+  const nextEnd = addDays(stripEndDate, 7)
+  return startOfCalendarDay(nextEnd) <= startOfCalendarDay(new Date())
+}
 
 function newId() {
   return typeof crypto !== 'undefined' && crypto.randomUUID
@@ -357,163 +379,1248 @@ function WorkoutPanel({ habits, focusSec, running, onToggleTimer }) {
   )
 }
 
-function SupplementsPanel({ api }) {
-  const todayKey = useMemo(() => toDateKey(new Date()), [])
-  const [name, setName] = useState('')
-  const [unit, setUnit] = useState('ölçek')
-  const [defaultAmount, setDefaultAmount] = useState('1')
-  const [dosePerUnit, setDosePerUnit] = useState('')
-  const [doseUnit, setDoseUnit] = useState('g')
-  const [inventory, setInventory] = useState('')
+/** 1–4 hazır seçenek; aksi halde "Diğer" + serbest değer */
+function splitDefaultAmountForPicker(raw) {
+  const n = Number(raw)
+  if (Number.isFinite(n) && n >= 1 && n <= 4 && Math.floor(n) === n) {
+    return { choice: String(Math.trunc(n)), other: '' }
+  }
+  return { choice: 'other', other: raw != null && raw !== '' ? String(raw) : '' }
+}
 
-  const logsToday = api.getLogsForDay(todayKey)
-  const amountBySupplement = useMemo(() => {
-    const map = new Map()
-    for (const r of logsToday || []) map.set(r.supplement_id, Number(r.amount) || 0)
-    return map
-  }, [logsToday])
+function resolvedDefaultAmountFromPicker(choice, otherStr) {
+  if (choice === 'other') {
+    const x = Number(String(otherStr).replace(',', '.').trim())
+    return Number.isFinite(x) && x > 0 ? x : 1
+  }
+  const n = Number(choice)
+  return Number.isFinite(n) && n > 0 ? n : 1
+}
 
-  async function create(e) {
+function SupDefaultAmountSelect({
+  choice,
+  onChoice,
+  other,
+  onOther,
+  idPrefix = 'sup-amt',
+  layout = 'stacked',
+}) {
+  const row = (
+    <div className={layout === 'inline' ? 'supAmtSelectRow supAmtSelectRowInline' : 'supAmtSelectRow'}>
+      <select
+        id={`${idPrefix}-sel`}
+        className="supInput supSmall"
+        value={choice}
+        onChange={(e) => onChoice(e.target.value)}
+        aria-label="Varsayılan günlük miktar"
+        title="Varsayılan günlük miktar"
+      >
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="other">Diğer…</option>
+      </select>
+      {choice === 'other' ? (
+        <input
+          className="supInput supSmall supAmtOtherInput"
+          value={other}
+          onChange={(e) => onOther(e.target.value)}
+          placeholder="Örn. 5"
+          inputMode="decimal"
+          aria-label="Özel miktar"
+        />
+      ) : null}
+    </div>
+  )
+
+  if (layout === 'inline') {
+    return <div className="supAmtBlockInline">{row}</div>
+  }
+
+  return (
+    <div className="supAmtBlock supAmtBlockSelect">
+      <label className="supAmtPickLbl" htmlFor={`${idPrefix}-sel`}>
+        Varsayılan günlük miktar
+      </label>
+      {row}
+    </div>
+  )
+}
+
+function SupplementIntakeScheduleFields({
+  enabled,
+  onEnabled,
+  mode,
+  onMode,
+  weeklyDay,
+  onWeeklyDay,
+  customDays,
+  onCustomDays,
+  intervalAnchor,
+  onIntervalAnchor,
+  idPrefix,
+}) {
+  const prevModeRef = useRef(mode)
+
+  function toggleDay(v) {
+    const set = new Set(customDays)
+    if (set.has(v)) set.delete(v)
+    else set.add(v)
+    onCustomDays([...set].sort((a, b) => a - b))
+  }
+
+  const needsAnchor = mode === INTAKE_MODE.EVERY_2_DAYS || mode === INTAKE_MODE.EVERY_3_DAYS
+
+  useEffect(() => {
+    if (!enabled) {
+      prevModeRef.current = mode
+      return
+    }
+    const nowNeeds = mode === INTAKE_MODE.EVERY_2_DAYS || mode === INTAKE_MODE.EVERY_3_DAYS
+    const prevNeeds =
+      prevModeRef.current === INTAKE_MODE.EVERY_2_DAYS ||
+      prevModeRef.current === INTAKE_MODE.EVERY_3_DAYS
+    if (nowNeeds && !prevNeeds) {
+      onIntervalAnchor(toMondayOfWeekDateKey(new Date()))
+    }
+    prevModeRef.current = mode
+  }, [enabled, mode, onIntervalAnchor])
+
+  return (
+    <>
+      <label className="supInvToggle">
+        <input type="checkbox" checked={enabled} onChange={(e) => onEnabled(e.target.checked)} />
+        <span>Alış sıklığı (isteğe bağlı)</span>
+      </label>
+      {enabled ? (
+        <div className="supIntakeBlock">
+          <p className="supInvNote supIntakeLead">
+            Sadece kayıt — takvimde otomatik kısıt yok. İleride hatırlatıcı bununla bağlanabilir.
+          </p>
+          <label className="supDetailLbl" htmlFor={`${idPrefix}-mode`}>
+            Sıklık
+          </label>
+          <select
+            id={`${idPrefix}-mode`}
+            className="supInput supSmall"
+            value={mode}
+            onChange={(e) => onMode(e.target.value)}
+          >
+            <option value={INTAKE_MODE.DAILY}>Her gün</option>
+            <option value={INTAKE_MODE.WEEKDAYS}>Sadece hafta içi</option>
+            <option value={INTAKE_MODE.WEEKENDS}>Sadece haftasonu</option>
+            <option value={INTAKE_MODE.WEEKLY}>Haftada bir</option>
+            <option value={INTAKE_MODE.EVERY_2_DAYS}>2 günde bir</option>
+            <option value={INTAKE_MODE.EVERY_3_DAYS}>3 günde bir</option>
+            <option value={INTAKE_MODE.CUSTOM_DAYS}>Haftanın seçili günleri</option>
+          </select>
+          {needsAnchor ? (
+            <>
+              <label className="supDetailLbl" htmlFor={`${idPrefix}-anchor`}>
+                Başlangıç (varsayılan bu haftanın pazartesi)
+              </label>
+              <input
+                id={`${idPrefix}-anchor`}
+                type="date"
+                className="supInput supSmall"
+                value={intervalAnchor}
+                onChange={(e) => onIntervalAnchor(e.target.value)}
+              />
+              <p className="supInvNote">
+                Başlangıç pazartesi ise: 2 günde bir sırayla Pazartesi — Çarşamba — Cuma — Pazar; 3 günde
+                bir sırayla Pazartesi — Perşembe — Pazar — Çarşamba… Periyot, seçtiğin tarihten itibaren +2 /
+                +3 gün mantığıyla devam eder; farklı bir desen istersen başlangıç tarihini kaydır.
+              </p>
+            </>
+          ) : null}
+          {mode === INTAKE_MODE.WEEKLY ? (
+            <>
+              <label className="supDetailLbl" htmlFor={`${idPrefix}-wday`}>
+                Haftanın günü
+              </label>
+              <select
+                id={`${idPrefix}-wday`}
+                className="supInput supSmall"
+                value={weeklyDay}
+                onChange={(e) => onWeeklyDay(Number(e.target.value))}
+              >
+                {INTAKE_DOW_OPTIONS.map(({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </>
+          ) : null}
+          {mode === INTAKE_MODE.CUSTOM_DAYS ? (
+            <div className="supIntakeDowRow" role="group" aria-label="Alınan günler">
+              {INTAKE_DOW_OPTIONS.map(({ value, label }) => {
+                const on = customDays.includes(value)
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    className={`supIntakeDowBtn ${on ? 'isOn' : ''}`}
+                    aria-pressed={on}
+                    onClick={() => toggleDay(value)}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </>
+  )
+}
+
+function supplementTemplateInitial(s) {
+  const presets = ['ölçek/servis', 'kapsül/tablet']
+  const unitChoice = presets.includes(s.unit) ? s.unit : '__custom__'
+  const unitCustom = presets.includes(s.unit) ? '' : s.unit || ''
+  const hasDose = s.dose_per_unit != null && s.dose_unit
+  const du = s.dose_unit
+  let doseUnitChoice = 'g'
+  let doseUnitCustom = ''
+  if (du === 'g' || du === 'ml') {
+    doseUnitChoice = du
+  } else if (du) {
+    doseUnitChoice = '__custom__'
+    doseUnitCustom = du
+  }
+  const invOn = s.inventory_amount != null && s.inventory_unit
+  const iu = s.inventory_unit
+  let inventoryUnitChoice = 'g'
+  let inventoryUnitCustom = ''
+  if (iu === 'g' || iu === 'ml' || iu === 'adet') {
+    inventoryUnitChoice = iu
+  } else if (iu) {
+    inventoryUnitChoice = '__custom__'
+    inventoryUnitCustom = iu
+  }
+  const da = splitDefaultAmountForPicker(s.default_amount ?? 1)
+  const intakeModeSource = s.intake_mode ?? s.reminder_mode
+  const intakeMode =
+    intakeModeSource && Object.values(INTAKE_MODE).includes(intakeModeSource)
+      ? intakeModeSource
+      : INTAKE_MODE.DAILY
+  let intakeWeeklyDay = 1
+  const wd = Number(s.intake_weekly_day ?? s.reminder_weekly_day)
+  if (Number.isFinite(wd)) intakeWeeklyDay = ((Math.trunc(wd) % 7) + 7) % 7
+  const intakeCustomSource = s.intake_custom_days ?? s.reminder_custom_days
+  const intakeAnchorSource = s.intake_interval_anchor ?? s.reminder_interval_anchor
+  const intakeIntervalAnchor =
+    intakeAnchorSource != null
+      ? String(intakeAnchorSource).slice(0, 10)
+      : toMondayOfWeekDateKey(new Date())
+
+  return {
+    name: s.name,
+    unitChoice,
+    unitCustom,
+    defaultAmtChoice: da.choice,
+    defaultAmtOther: da.other,
+    doseEnabled: hasDose,
+    dosePerUnit: hasDose ? String(s.dose_per_unit) : '',
+    doseUnitChoice,
+    doseUnitCustom,
+    inventoryEnabled: Boolean(invOn),
+    inventoryAmount: invOn ? String(s.inventory_amount) : '',
+    inventoryUnitChoice,
+    inventoryUnitCustom,
+    intakeEnabled: Boolean(s.intake_enabled ?? s.reminder_enabled),
+    intakeMode,
+    intakeWeeklyDay,
+    intakeCustomDays: normalizeCustomDays(intakeCustomSource),
+    intakeIntervalAnchor,
+  }
+}
+
+function SupplementTemplateEditor({ s, api, onClose, embedded = false }) {
+  const init = supplementTemplateInitial(s)
+  const [name, setName] = useState(init.name)
+  const [unitChoice, setUnitChoice] = useState(init.unitChoice)
+  const [unitCustom, setUnitCustom] = useState(init.unitCustom)
+  const [defaultAmtChoice, setDefaultAmtChoice] = useState(init.defaultAmtChoice)
+  const [defaultAmtOther, setDefaultAmtOther] = useState(init.defaultAmtOther)
+  const [doseEnabled, setDoseEnabled] = useState(init.doseEnabled)
+  const [dosePerUnit, setDosePerUnit] = useState(init.dosePerUnit)
+  const [doseUnitChoice, setDoseUnitChoice] = useState(init.doseUnitChoice)
+  const [doseUnitCustom, setDoseUnitCustom] = useState(init.doseUnitCustom)
+  const [inventoryEnabled, setInventoryEnabled] = useState(init.inventoryEnabled)
+  const [inventoryAmount, setInventoryAmount] = useState(init.inventoryAmount)
+  const [inventoryUnitChoice, setInventoryUnitChoice] = useState(init.inventoryUnitChoice)
+  const [inventoryUnitCustom, setInventoryUnitCustom] = useState(init.inventoryUnitCustom)
+  const [intakeEnabled, setIntakeEnabled] = useState(init.intakeEnabled)
+  const [intakeMode, setIntakeMode] = useState(init.intakeMode)
+  const [intakeWeeklyDay, setIntakeWeeklyDay] = useState(init.intakeWeeklyDay)
+  const [intakeCustomDays, setIntakeCustomDays] = useState(init.intakeCustomDays)
+  const [intakeIntervalAnchor, setIntakeIntervalAnchor] = useState(init.intakeIntervalAnchor)
+
+  async function save(e) {
     e.preventDefault()
-    await api.addSupplement({
-      name,
-      unit,
-      default_amount: defaultAmount,
-      dose_per_unit: dosePerUnit,
-      dose_unit: doseUnit,
-      inventory_count: inventory,
+    if (
+      intakeEnabled &&
+      intakeMode === INTAKE_MODE.CUSTOM_DAYS &&
+      normalizeCustomDays(intakeCustomDays).length === 0
+    ) {
+      window.alert('Haftanın seçili günleri için en az bir gün seç.')
+      return
+    }
+    const resolvedUnit = unitChoice === '__custom__' ? unitCustom.trim() : unitChoice
+    const resolvedDoseUnit = doseUnitChoice === '__custom__' ? doseUnitCustom.trim() : doseUnitChoice
+    const resolvedInventoryUnit =
+      inventoryUnitChoice === '__custom__' ? inventoryUnitCustom.trim() : inventoryUnitChoice
+    const intakePatch = buildIntakeScheduleDbFields({
+      enabled: intakeEnabled,
+      mode: intakeMode,
+      weeklyDay: intakeWeeklyDay,
+      customDays: intakeCustomDays,
+      intervalAnchor:
+        intakeMode === INTAKE_MODE.EVERY_2_DAYS || intakeMode === INTAKE_MODE.EVERY_3_DAYS
+          ? intakeIntervalAnchor || undefined
+          : undefined,
     })
+    await api.updateSupplement(s.id, {
+      name: name.trim(),
+      unit: resolvedUnit || 'ölçek/servis',
+      default_amount: resolvedDefaultAmountFromPicker(defaultAmtChoice, defaultAmtOther),
+      dose_per_unit:
+        doseEnabled && dosePerUnit !== '' && dosePerUnit != null ? Number(dosePerUnit) : null,
+      dose_unit: doseEnabled ? resolvedDoseUnit || null : null,
+      inventory_amount: inventoryEnabled && inventoryAmount !== '' ? Number(inventoryAmount) : null,
+      inventory_unit: inventoryEnabled ? resolvedInventoryUnit || null : null,
+      ...intakePatch,
+    })
+    onClose?.()
+  }
+
+  return (
+    <form className="supTplForm" onSubmit={save}>
+      <p className="supTplK">Şablon (sonraki günler)</p>
+      <input className="supInput" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ad" />
+      <div className="supTplRow">
+        <select
+          className="supInput supSmall"
+          value={unitChoice}
+          onChange={(e) => setUnitChoice(e.target.value)}
+          aria-label="Birim"
+        >
+          <option value="ölçek/servis">Ölçek / Servis</option>
+          <option value="kapsül/tablet">Kapsül / Tablet</option>
+          <option value="__custom__">Diğer…</option>
+        </select>
+        {unitChoice === '__custom__' ? (
+          <input
+            className="supInput supSmall"
+            value={unitCustom}
+            onChange={(e) => setUnitCustom(e.target.value)}
+            placeholder="Birim"
+          />
+        ) : null}
+      </div>
+      <SupDefaultAmountSelect
+        choice={defaultAmtChoice}
+        onChoice={setDefaultAmtChoice}
+        other={defaultAmtOther}
+        onOther={setDefaultAmtOther}
+        idPrefix={`tpl-amt-${s.id}`}
+      />
+      <label className="supInvToggle">
+        <input type="checkbox" checked={doseEnabled} onChange={(e) => setDoseEnabled(e.target.checked)} />
+        <span>Doz</span>
+      </label>
+      {doseEnabled ? (
+        <div className="supTplRow">
+          <input
+            className="supInput supSmall"
+            value={dosePerUnit}
+            onChange={(e) => setDosePerUnit(e.target.value)}
+            placeholder="1 birimde doz"
+            inputMode="decimal"
+          />
+          <select
+            className="supInput supTiny"
+            value={doseUnitChoice}
+            onChange={(e) => setDoseUnitChoice(e.target.value)}
+            aria-label="Doz birimi"
+          >
+            <option value="g">g</option>
+            <option value="ml">ml</option>
+            <option value="__custom__">Diğer…</option>
+          </select>
+          {doseUnitChoice === '__custom__' ? (
+            <input
+              className="supInput supTiny"
+              value={doseUnitCustom}
+              onChange={(e) => setDoseUnitCustom(e.target.value)}
+              placeholder="örn. mg"
+            />
+          ) : null}
+        </div>
+      ) : null}
+      <label className="supInvToggle">
+        <input
+          type="checkbox"
+          checked={inventoryEnabled}
+          onChange={(e) => setInventoryEnabled(e.target.checked)}
+        />
+        <span>Stok</span>
+      </label>
+      {inventoryEnabled ? (
+        <div className="supInvStockBlock">
+          <div className="supInvStockInputs">
+            <input
+              className="supInput supSmall supInvStockAmt"
+              value={inventoryAmount}
+              onChange={(e) => setInventoryAmount(e.target.value)}
+              placeholder="Miktar"
+              inputMode="decimal"
+            />
+            <button
+              type="button"
+              className="supInvInfoBtn"
+              title="Listede gördüğün kalan miktar = buraya yazdığın toplam − tiklediğin günlerin tüketimi."
+              aria-label="Stok: listede kalan miktar, yazdığın toplamdan tiklenen günlerin tüketimi düşülerek hesaplanır."
+            >
+              <span className="material-symbols-outlined">info</span>
+            </button>
+            <select
+              className="supInput supTiny supInvStockUnit"
+              value={inventoryUnitChoice}
+              onChange={(e) => setInventoryUnitChoice(e.target.value)}
+              aria-label="Stok birimi"
+            >
+              <option value="g">g</option>
+              <option value="ml">ml</option>
+              <option value="adet">adet</option>
+              <option value="__custom__">Diğer…</option>
+            </select>
+            {inventoryUnitChoice === '__custom__' ? (
+              <input
+                className="supInput supTiny supInvStockCustom"
+                value={inventoryUnitCustom}
+                onChange={(e) => setInventoryUnitCustom(e.target.value)}
+                placeholder="örn. mg, servis"
+              />
+            ) : null}
+          </div>
+          <p className="supInvNote">
+            Listede görünen kalan = yazdığın toplam − tiklenen günlerin tüketimi.
+          </p>
+        </div>
+      ) : null}
+      <SupplementIntakeScheduleFields
+        enabled={intakeEnabled}
+        onEnabled={setIntakeEnabled}
+        mode={intakeMode}
+        onMode={setIntakeMode}
+        weeklyDay={intakeWeeklyDay}
+        onWeeklyDay={setIntakeWeeklyDay}
+        customDays={intakeCustomDays}
+        onCustomDays={setIntakeCustomDays}
+        intervalAnchor={intakeIntervalAnchor}
+        onIntervalAnchor={setIntakeIntervalAnchor}
+        idPrefix={`tpl-intake-${s.id}`}
+      />
+      <div className="supTplActions">
+        {!embedded ? (
+          <button type="button" className="supTplBtnGhost" onClick={onClose}>
+            Vazgeç
+          </button>
+        ) : null}
+        <button type="submit" className="supBtn" disabled={!name.trim()}>
+          {embedded ? 'Şablonu kaydet' : 'Kaydet'}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+function SupplementDetailPanel({ s, selectedDateKey, api, onClose, onDelete }) {
+  if (!s) return null
+
+  if (s.archived) {
+    return (
+      <div className="supDetailWrap">
+        <button type="button" className="supDetailBackdrop" aria-label="Kapat" onClick={onClose} />
+        <div className="supDetailSheet" role="dialog" aria-modal="true" aria-labelledby="supDetailTitle">
+          <div className="supDetailHead">
+            <h3 id="supDetailTitle" className="supDetailTitle">
+              {s.name}
+            </h3>
+            <button type="button" className="supDetailClose" onClick={onClose} aria-label="Kapat">
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <p className="supDetailSub">Arşivde — aktif listede görünmez.</p>
+          <div className="supDetailArchive">
+            <button
+              type="button"
+              className="supBtn"
+              onClick={async () => {
+                await api.updateSupplement(s.id, { archived: false })
+                onClose()
+              }}
+            >
+              Listeye geri al
+            </button>
+          </div>
+          <div className="supDetailDangerZone">
+            <button
+              type="button"
+              className="supTplBtnGhost supDangerText"
+              onClick={() => {
+                const ok = window.confirm(`“${s.name}” tamamen silinsin mi?`)
+                if (!ok) return
+                onDelete?.(s.id)
+                onClose()
+              }}
+            >
+              Takviyeyi sil
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <SupplementDetailPanelActive
+      s={s}
+      selectedDateKey={selectedDateKey}
+      api={api}
+      onClose={onClose}
+      onDelete={onDelete}
+    />
+  )
+}
+
+function SupplementDetailPanelActive({ s, selectedDateKey, api, onClose, onDelete }) {
+  const [focusDayKey, setFocusDayKey] = useState(selectedDateKey)
+  const [stripEndDate, setStripEndDate] = useState(() => fromDateKey(selectedDateKey))
+  const [dayAmtInput, setDayAmtInput] = useState('1')
+  const saveBtnRef = useRef(null)
+  const resetBtnRef = useRef(null)
+
+  function ackButtonPress(btnRef) {
+    try {
+      navigator.vibrate?.(12)
+    } catch {
+      /* yok say */
+    }
+    const el = btnRef.current
+    if (!el) return
+    el.classList.remove('supDetailActionAck')
+    void el.offsetWidth
+    el.classList.add('supDetailActionAck')
+    const onEnd = () => {
+      el.classList.remove('supDetailActionAck')
+      el.removeEventListener('animationend', onEnd)
+    }
+    el.addEventListener('animationend', onEnd)
+  }
+
+  useEffect(() => {
+    setFocusDayKey(selectedDateKey)
+    setStripEndDate(fromDateKey(selectedDateKey))
+  }, [selectedDateKey, s.id])
+
+  const detailWeek = useMemo(() => getLastNDays(7, stripEndDate), [stripEndDate])
+  const canShiftWeekNext = weekStripCanShiftNext(stripEndDate)
+
+  useEffect(() => {
+    const keys = new Set(detailWeek.map((d) => d.key))
+    if (!keys.has(focusDayKey)) {
+      setFocusDayKey(detailWeek[detailWeek.length - 1].key)
+    }
+  }, [detailWeek, focusDayKey])
+
+  const wd = getTrWeekdayShort(fromDateKey(focusDayKey))
+  const logs = api.getLogsForDay(focusDayKey)
+  const logRow = logs.find((r) => r.supplement_id === s.id)
+  const tpl = Number(s.default_amount) || 1
+  const eff = logRow ? Number(logRow.amount) || 0 : tpl
+  const doseText =
+    s.dose_per_unit != null && s.dose_unit ? `${s.dose_per_unit}${s.dose_unit} / ${s.unit}` : null
+
+  /** Yalnızca gün / takviye / şablon varsayılanı değişince inputu senkronla (Kaydet sonrası sıfırlanmasın). */
+  useEffect(() => {
+    const dayLogs = api.getLogsForDay(focusDayKey)
+    const row = dayLogs.find((r) => r.supplement_id === s.id && r.time == null)
+    const t = Number(s.default_amount) || 1
+    const nextEff = row ? Number(row.amount) || 0 : t
+    setDayAmtInput(String(nextEff))
+  }, [focusDayKey, s.id, s.default_amount])
+
+  /** Kaydet: şablondaki ile aynı olsa da bu gün için satır yazar. */
+  async function commitDayAmount() {
+    const n = Number(String(dayAmtInput).replace(',', '.').trim())
+    if (!Number.isFinite(n) || n < 0) {
+      setDayAmtInput(String(eff))
+      return
+    }
+    const sameAsPersisted = logRow && Number(logRow.amount) === n
+    if (sameAsPersisted) {
+      ackButtonPress(saveBtnRef)
+      return
+    }
+
+    try {
+      await api.upsertLogForDay({ dateKey: focusDayKey, supplementId: s.id, amount: n })
+      ackButtonPress(saveBtnRef)
+    } catch (err) {
+      window.alert(err?.message || 'Kaydedilemedi.')
+      setDayAmtInput(String(eff))
+    }
+  }
+
+  async function markArchived() {
+    const ok = window.confirm('Bu takviyi arşive taşıyalım mı? (İstersen sonra geri alabilirsin.)')
+    if (!ok) return
+    await api.updateSupplement(s.id, { archived: true })
+    onClose()
+  }
+
+  return (
+    <div className="supDetailWrap">
+      <button type="button" className="supDetailBackdrop" aria-label="Kapat" onClick={onClose} />
+      <div className="supDetailSheet" role="dialog" aria-modal="true" aria-labelledby="supDetailTitle">
+        <div className="supDetailHead">
+          <h3 id="supDetailTitle" className="supDetailTitle">
+            {s.name}
+          </h3>
+          <button type="button" className="supDetailClose" onClick={onClose} aria-label="Kapat">
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <p className="supDetailSub">
+          Seçili gün: {wd} · {focusDayKey}
+          {doseText ? <span className="supDetailDose"> · {doseText}</span> : null}
+        </p>
+
+        <div className="supDetailWeekStrip" role="group" aria-label="Hafta — geçmişe git">
+          <button
+            type="button"
+            className="supDetailWeekNavBtn"
+            aria-label="Önceki haftaya git"
+            onClick={() => setStripEndDate((d) => addDays(d, -7))}
+          >
+            <span className="material-symbols-outlined">chevron_left</span>
+          </button>
+          <div className="protocolStitchWeek supDetailWeek" role="tablist" aria-label="Gün seç">
+            {detailWeek.map(({ key, date }) => {
+              const active = key === focusDayKey
+              const short = getTrWeekdayShort(date)
+              const dayHasLog = api
+                .getLogsForDay(key)
+                .some((r) => r.supplement_id === s.id && r.time == null)
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  className={`protocolStitchDay supDetailDayPick ${dayHasLog ? 'supDetailDayHasLog' : ''} ${active ? 'isToday' : ''}`}
+                  onClick={() => setFocusDayKey(key)}
+                >
+                  <span className="protocolStitchDayDow">{short}</span>
+                  <span className="protocolStitchDayDom">{key.slice(8)}</span>
+                </button>
+              )
+            })}
+          </div>
+          <button
+            type="button"
+            className="supDetailWeekNavBtn"
+            aria-label="Sonraki haftaya git"
+            disabled={!canShiftWeekNext}
+            onClick={() => setStripEndDate((d) => addDays(d, 7))}
+          >
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+
+        <label className="supDetailLbl">Bu gün alınan miktar ({s.unit})</label>
+        <input
+          className="supDayAmtInput supDetailDayAmtInput"
+          value={dayAmtInput}
+          onChange={(e) => setDayAmtInput(e.target.value)}
+          inputMode="decimal"
+          aria-describedby={`sup-day-hint-${s.id}`}
+        />
+        <p className="supDetailHint" id={`sup-day-hint-${s.id}`}>
+          Yukarıdan günü seç; miktarı yazdıktan sonra yalnızca Kaydet ile sunucuya yazılır. Kaydet,
+          şablondaki ile aynı olsa da bu günü kayda geçirir. Turuncu vurgulu günlerde bu takviye için
+          kayıt vardır.
+        </p>
+
+        <div className="supDetailActions">
+          <button
+            ref={resetBtnRef}
+            type="button"
+            className="supTplBtnGhost supDetailActionBtn"
+            onClick={() => {
+              void (async () => {
+                try {
+                  await api.deleteLogForDay({ dateKey: focusDayKey, supplementId: s.id })
+                  const t = Number(s.default_amount) || 1
+                  setDayAmtInput(String(t))
+                  ackButtonPress(resetBtnRef)
+                } catch (err) {
+                  window.alert(err?.message || 'Güncellenemedi.')
+                }
+              })()
+            }}
+          >
+            Varsayılana dön
+          </button>
+          <button
+            ref={saveBtnRef}
+            type="button"
+            className="supBtn supBtnSmall supDetailSaveAmt supDetailActionBtn"
+            onClick={() => void commitDayAmount()}
+          >
+            Kaydet
+          </button>
+        </div>
+
+        <div className="supDetailDivider" />
+
+        <SupplementTemplateEditor key={`${s.id}-${s.updated_at}`} s={s} api={api} embedded />
+
+        <div className="supDetailDivider" />
+
+        <div className="supDetailArchive">
+          <button type="button" className="supBtn supBtnGhost" onClick={markArchived}>
+            Takviye bitti → arşiv
+          </button>
+        </div>
+
+        <div className="supDetailDangerZone">
+          <button
+            type="button"
+            className="supTplBtnGhost supDangerText"
+            onClick={() => {
+              const ok = window.confirm(`“${s.name}” tamamen silinsin mi?`)
+              if (!ok) return
+              onDelete?.(s.id)
+              onClose()
+            }}
+          >
+            Takviyeyi sil
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function SupplementAddSheet({ api, open, onClose }) {
+  const [name, setName] = useState('')
+  const [unitChoice, setUnitChoice] = useState('ölçek/servis')
+  const [unitCustom, setUnitCustom] = useState('')
+  const [defaultAmtChoice, setDefaultAmtChoice] = useState('1')
+  const [defaultAmtOther, setDefaultAmtOther] = useState('')
+  const [doseEnabled, setDoseEnabled] = useState(false)
+  const [dosePerUnit, setDosePerUnit] = useState('')
+  const [doseUnitChoice, setDoseUnitChoice] = useState('g')
+  const [doseUnitCustom, setDoseUnitCustom] = useState('')
+  const [inventoryEnabled, setInventoryEnabled] = useState(false)
+  const [inventoryAmount, setInventoryAmount] = useState('')
+  const [inventoryUnitChoice, setInventoryUnitChoice] = useState('g')
+  const [inventoryUnitCustom, setInventoryUnitCustom] = useState('')
+  const [intakeEnabled, setIntakeEnabled] = useState(false)
+  const [intakeMode, setIntakeMode] = useState(INTAKE_MODE.DAILY)
+  const [intakeWeeklyDay, setIntakeWeeklyDay] = useState(1)
+  const [intakeCustomDays, setIntakeCustomDays] = useState([])
+  const [intakeIntervalAnchor, setIntakeIntervalAnchor] = useState(() => toMondayOfWeekDateKey(new Date()))
+
+  useEffect(() => {
+    if (!open) return
     setName('')
+    setUnitChoice('ölçek/servis')
+    setUnitCustom('')
+    setDefaultAmtChoice('1')
+    setDefaultAmtOther('')
+    setDoseEnabled(false)
     setDosePerUnit('')
-    setInventory('')
+    setDoseUnitChoice('g')
+    setDoseUnitCustom('')
+    setInventoryEnabled(false)
+    setInventoryAmount('')
+    setInventoryUnitChoice('g')
+    setInventoryUnitCustom('')
+    setIntakeEnabled(false)
+    setIntakeMode(INTAKE_MODE.DAILY)
+    setIntakeWeeklyDay(1)
+    setIntakeCustomDays([])
+    setIntakeIntervalAnchor(toMondayOfWeekDateKey(new Date()))
+  }, [open])
+
+  if (!open) return null
+
+  async function submit(e) {
+    e.preventDefault()
+    if (
+      intakeEnabled &&
+      intakeMode === INTAKE_MODE.CUSTOM_DAYS &&
+      normalizeCustomDays(intakeCustomDays).length === 0
+    ) {
+      window.alert('Haftanın seçili günleri için en az bir gün seç.')
+      return
+    }
+    const resolvedUnit = unitChoice === '__custom__' ? unitCustom.trim() : unitChoice
+    const resolvedDoseUnit = doseUnitChoice === '__custom__' ? doseUnitCustom.trim() : doseUnitChoice
+    const resolvedInventoryUnit =
+      inventoryUnitChoice === '__custom__' ? inventoryUnitCustom.trim() : inventoryUnitChoice
+    const intakePatch = buildIntakeScheduleDbFields({
+      enabled: intakeEnabled,
+      mode: intakeMode,
+      weeklyDay: intakeWeeklyDay,
+      customDays: intakeCustomDays,
+      intervalAnchor:
+        intakeMode === INTAKE_MODE.EVERY_2_DAYS || intakeMode === INTAKE_MODE.EVERY_3_DAYS
+          ? intakeIntervalAnchor || undefined
+          : undefined,
+    })
+    try {
+      await api.addSupplement({
+        name,
+        unit: resolvedUnit || 'ölçek/servis',
+        default_amount: resolvedDefaultAmountFromPicker(defaultAmtChoice, defaultAmtOther),
+        dose_per_unit: doseEnabled ? dosePerUnit : null,
+        dose_unit: doseEnabled ? resolvedDoseUnit || null : null,
+        inventory_amount: inventoryEnabled ? inventoryAmount : null,
+        inventory_unit: inventoryEnabled ? resolvedInventoryUnit || null : null,
+        ...intakePatch,
+      })
+      onClose()
+    } catch (err) {
+      window.alert(err?.message || 'Takviye eklenemedi.')
+    }
+  }
+
+  return (
+    <div className="supDetailWrap">
+      <button type="button" className="supDetailBackdrop" aria-label="Kapat" onClick={onClose} />
+      <div className="supDetailSheet" role="dialog" aria-modal="true" aria-labelledby="supAddTitle">
+        <div className="supDetailHead">
+          <h3 id="supAddTitle" className="supDetailTitle">
+            Yeni takviye
+          </h3>
+          <button type="button" className="supDetailClose" onClick={onClose} aria-label="Kapat">
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <p className="supDetailSub">Düzenle paneliyle aynı alanlar — kaydettikten sonra listede görünür.</p>
+
+        <form className="supAddSheetForm" onSubmit={submit}>
+          <input
+            className="supInput"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Takviye adı (örn. Kreatin)"
+          />
+          <select
+            className="supInput supSmall"
+            value={unitChoice}
+            onChange={(e) => setUnitChoice(e.target.value)}
+            aria-label="Birim"
+          >
+            <option value="ölçek/servis">Ölçek / Servis</option>
+            <option value="kapsül/tablet">Kapsül / Tablet</option>
+            <option value="__custom__">Diğer…</option>
+          </select>
+          {unitChoice === '__custom__' ? (
+            <input
+              className="supInput supSmall"
+              value={unitCustom}
+              onChange={(e) => setUnitCustom(e.target.value)}
+              placeholder="Birim (örn. shot, damla)"
+            />
+          ) : null}
+          <SupDefaultAmountSelect
+            choice={defaultAmtChoice}
+            onChoice={setDefaultAmtChoice}
+            other={defaultAmtOther}
+            onOther={setDefaultAmtOther}
+            idPrefix="sup-sheet-amt"
+          />
+          <label className="supInvToggle supInvToggleSheet">
+            <input type="checkbox" checked={doseEnabled} onChange={(e) => setDoseEnabled(e.target.checked)} />
+            <span>Doz</span>
+          </label>
+          {doseEnabled ? (
+            <>
+              <div className="supAddSheetPair">
+                <input
+                  className="supInput supSmall"
+                  value={dosePerUnit}
+                  onChange={(e) => setDosePerUnit(e.target.value)}
+                  placeholder="1 birimde doz (örn. 5)"
+                  inputMode="decimal"
+                />
+                <select
+                  className="supInput supTiny"
+                  value={doseUnitChoice}
+                  onChange={(e) => setDoseUnitChoice(e.target.value)}
+                  aria-label="Doz birimi"
+                >
+                  <option value="g">g</option>
+                  <option value="ml">ml</option>
+                  <option value="__custom__">Diğer…</option>
+                </select>
+              </div>
+              {doseUnitChoice === '__custom__' ? (
+                <input
+                  className="supInput supTiny"
+                  value={doseUnitCustom}
+                  onChange={(e) => setDoseUnitCustom(e.target.value)}
+                  placeholder="Doz birimi (örn. mg)"
+                />
+              ) : null}
+            </>
+          ) : null}
+          <label className="supInvToggle supInvToggleSheet">
+            <input
+              type="checkbox"
+              checked={inventoryEnabled}
+              onChange={(e) => setInventoryEnabled(e.target.checked)}
+            />
+            <span>Stok</span>
+          </label>
+          {inventoryEnabled ? (
+            <div className="supInvStockBlock">
+              <div className="supInvStockInputs supInvStockInputsSheet">
+                <input
+                  className="supInput supSmall supInvStockAmt"
+                  value={inventoryAmount}
+                  onChange={(e) => setInventoryAmount(e.target.value)}
+                  placeholder="Miktar (örn. 300)"
+                  inputMode="decimal"
+                />
+                <button
+                  type="button"
+                  className="supInvInfoBtn"
+                  title="Listede görünen kalan = yazdığın toplam − tiklediğin günler."
+                  aria-label="Stok: kalan miktar, toplam stoktan tiklenen günler düşülerek hesaplanır."
+                >
+                  <span className="material-symbols-outlined">info</span>
+                </button>
+                <select
+                  className="supInput supTiny supInvStockUnit"
+                  value={inventoryUnitChoice}
+                  onChange={(e) => setInventoryUnitChoice(e.target.value)}
+                  aria-label="Stok birimi"
+                >
+                  <option value="g">g</option>
+                  <option value="ml">ml</option>
+                  <option value="adet">adet</option>
+                  <option value="__custom__">Diğer…</option>
+                </select>
+                {inventoryUnitChoice === '__custom__' ? (
+                  <input
+                    className="supInput supTiny supInvStockCustom"
+                    value={inventoryUnitCustom}
+                    onChange={(e) => setInventoryUnitCustom(e.target.value)}
+                    placeholder="Stok birimi (örn. mg, servis)"
+                  />
+                ) : null}
+              </div>
+              <p className="supInvNote">
+                Listede görünen kalan = yazdığın toplam − tiklenen günler.
+              </p>
+            </div>
+          ) : null}
+
+          <SupplementIntakeScheduleFields
+            enabled={intakeEnabled}
+            onEnabled={setIntakeEnabled}
+            mode={intakeMode}
+            onMode={setIntakeMode}
+            weeklyDay={intakeWeeklyDay}
+            onWeeklyDay={setIntakeWeeklyDay}
+            customDays={intakeCustomDays}
+            onCustomDays={setIntakeCustomDays}
+            intervalAnchor={intakeIntervalAnchor}
+            onIntervalAnchor={setIntakeIntervalAnchor}
+            idPrefix="sup-sheet-intake"
+          />
+
+          <div className="supAddSheetFooter">
+            <button type="button" className="supTplBtnGhost" onClick={onClose}>
+              İptal
+            </button>
+            <button className="supBtn" type="submit" disabled={!name.trim()}>
+              Ekle
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+function SupplementsPanel({ api }) {
+  const todayKey = toDateKey(new Date())
+  const weekDays = useMemo(() => getLastNDays(7, new Date()), [todayKey])
+  const [addOpen, setAddOpen] = useState(false)
+  const [detailId, setDetailId] = useState(null)
+  const { activeSupplements, archivedSupplements } = useMemo(() => {
+    const all = api.supplements || []
+    const active = []
+    const archived = []
+    for (const row of all) {
+      if (row.archived) archived.push(row)
+      else active.push(row)
+    }
+    return { activeSupplements: active, archivedSupplements: archived }
+  }, [api.supplements])
+
+  const detailSup = useMemo(
+    () => (detailId ? (api.supplements || []).find((x) => x.id === detailId) ?? null : null),
+    [api.supplements, detailId],
+  )
+
+  const logsForDay = api.getLogsForDay(todayKey)
+  const logBySupplement = useMemo(() => {
+    const map = new Map()
+    for (const r of logsForDay || []) map.set(r.supplement_id, r)
+    return map
+  }, [logsForDay])
+
+  const supplementDoneByDay = useMemo(() => {
+    const m = new Map()
+    for (const { key } of weekDays) {
+      for (const r of api.getLogsForDay(key)) {
+        if (!m.has(r.supplement_id)) m.set(r.supplement_id, new Set())
+        m.get(r.supplement_id).add(key)
+      }
+    }
+    return m
+  }, [weekDays, api.logsByDay])
+
+  function effectiveAmount(s) {
+    const row = logBySupplement.get(s.id)
+    if (row) return Number(row.amount) || 0
+    return Number(s.default_amount) || 1
+  }
+
+  function hasLogForDay(s) {
+    return Boolean(logBySupplement.get(s.id))
+  }
+
+  async function toggleDayLog(s) {
+    try {
+      if (hasLogForDay(s)) {
+        await api.deleteLogForDay({ dateKey: todayKey, supplementId: s.id })
+      } else {
+        await api.upsertLogForDay({
+          dateKey: todayKey,
+          supplementId: s.id,
+          amount: Number(s.default_amount) || 1,
+        })
+      }
+    } catch (err) {
+      window.alert(err?.message || 'Kayıt güncellenemedi.')
+    }
+  }
+
+  async function toggleDayLogForDate(s, dateKey) {
+    try {
+      const logs = api.getLogsForDay(dateKey)
+      const row = logs.find((r) => r.supplement_id === s.id)
+      if (row) {
+        await api.deleteLogForDay({ dateKey, supplementId: s.id })
+      } else {
+        await api.upsertLogForDay({
+          dateKey,
+          supplementId: s.id,
+          amount: Number(s.default_amount) || 1,
+        })
+      }
+    } catch (err) {
+      window.alert(err?.message || 'Kayıt güncellenemedi.')
+    }
+  }
+
+  function openAddSheet() {
+    setDetailId(null)
+    setAddOpen(true)
   }
 
   return (
     <div className="supPage">
-      <div className="supTop">
-        <div>
-          <h2 className="supTitle">Takviye takibi</h2>
-          <p className="supSub">Bugün: {todayKey} · hızlı kayıt + stok</p>
-        </div>
+      <div className="supTop supTopWithAct">
+        <h2 className="supTitle">Takviye takibi</h2>
+        <button type="button" className="supFabAdd" onClick={openAddSheet} aria-label="Takviye ekle">
+          <span className="material-symbols-outlined">add</span>
+        </button>
       </div>
 
-      <form className="supAdd" onSubmit={create}>
-        <input
-          className="supInput"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Takviye adı (örn. Kreatin)"
-        />
-        <input
-          className="supInput supSmall"
-          value={unit}
-          onChange={(e) => setUnit(e.target.value)}
-          placeholder="Birim (ölçek/kapsül)"
-        />
-        <input
-          className="supInput supSmall"
-          value={defaultAmount}
-          onChange={(e) => setDefaultAmount(e.target.value)}
-          placeholder="Varsayılan (örn. 1)"
-          inputMode="decimal"
-        />
-        <input
-          className="supInput supSmall"
-          value={dosePerUnit}
-          onChange={(e) => setDosePerUnit(e.target.value)}
-          placeholder="1 birimde doz"
-          inputMode="decimal"
-        />
-        <input
-          className="supInput supTiny"
-          value={doseUnit}
-          onChange={(e) => setDoseUnit(e.target.value)}
-          placeholder="g/mg/IU"
-        />
-        <input
-          className="supInput supSmall"
-          value={inventory}
-          onChange={(e) => setInventory(e.target.value)}
-          placeholder="Stok (örn. 60)"
-          inputMode="decimal"
-        />
-        <button className="supBtn" type="submit" disabled={!name.trim()}>
-          Ekle
-        </button>
-      </form>
+      {api.loading ? <div className="supMuted">Yükleniyor…</div> : null}
 
       {api.error ? <div className="supErr">{api.error}</div> : null}
 
-      <div className="supGrid">
-        {(api.supplements || []).map((s) => {
-          const cur = amountBySupplement.get(s.id) || 0
-          const doseText =
-            s.dose_per_unit != null && s.dose_unit ? `${s.dose_per_unit}${s.dose_unit} / ${s.unit}` : null
+      <div className="supHabitList">
+        {activeSupplements.map((s) => {
+          const on = hasLogForDay(s)
+          const eff = effectiveAmount(s)
+          const tpl = Number(s.default_amount) || 1
+          const iconName = protocolStitchIcon(s.id)
+          const doneDays = supplementDoneByDay.get(s.id) ?? new Set()
+          const rem = api.getInventoryRemaining(s)
+          const stock =
+            rem == null || !s.inventory_unit
+              ? null
+              : `${rem} ${s.inventory_unit}`
           return (
-            <div key={s.id} className="supCard">
-              <div className="supCardHead">
-                <div>
-                  <div className="supName">{s.name}</div>
-                  <div className="supMeta">
-                    Bugün: <b>{cur}</b> {s.unit}
-                    {doseText ? <span> · {doseText}</span> : null}
+            <article key={s.id} className={`protocolStitch ${on ? 'protocolStitchDone' : ''}`}>
+              <div className="protocolStitchMain">
+                <div className="protocolStitchLeft">
+                  <div className={`protocolStitchIcon ${on ? 'isProtocolDone' : ''}`} aria-hidden="true">
+                    <span
+                      className="material-symbols-outlined protocolStitchIconSym"
+                      style={{ fontVariationSettings: "'FILL' 1" }}
+                    >
+                      {iconName}
+                    </span>
+                  </div>
+                  <div className="protocolStitchInfo">
+                    <button
+                      type="button"
+                      className="protocolStitchTitle supProtoTitleBtn"
+                      onClick={() => {
+                        setAddOpen(false)
+                        setDetailId(s.id)
+                      }}
+                    >
+                      {s.name}
+                    </button>
+                    <p className="protocolStitchMeta">
+                      {on ? (
+                        <>
+                          Bu gün <span className="supMetaAmt">{eff}</span> {s.unit}
+                          {Number(eff) !== tpl ? ` · şablon ${tpl}` : ''}
+                        </>
+                      ) : (
+                        <>
+                          Şablon <span className="supMetaAmt">{tpl}</span> {s.unit}
+                        </>
+                      )}
+                      {stock ? ` · stok ${stock}` : ''}
+                    </p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="supIconBtn supDanger"
-                  onClick={() => api.deleteSupplement(s.id)}
-                  aria-label="Sil"
-                  title="Sil"
-                >
-                  <span className="material-symbols-outlined">close</span>
-                </button>
+                <div className="protocolStitchRight">
+                  <div className="protocolStitchTools">
+                    <button
+                      type="button"
+                      className="protocolStitchTool"
+                      onClick={() => {
+                        setAddOpen(false)
+                        setDetailId(s.id)
+                      }}
+                      title="Düzenle — isim, stok, şablon, gün bazlı miktar"
+                    >
+                      <span className="material-symbols-outlined">edit</span>
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    className={`protocolStitchCheck ${on ? 'isOn' : ''}`}
+                    onClick={() => toggleDayLog(s)}
+                    aria-label={on ? 'Bugünkü işareti kaldır' : 'Bugün alındı işaretle'}
+                  >
+                    {on ? (
+                      <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+                        done_all
+                      </span>
+                    ) : (
+                      <span className="material-symbols-outlined">check</span>
+                    )}
+                  </button>
+                </div>
               </div>
-
-              <div className="supQuick">
-                <button
-                  type="button"
-                  className="supQuickBtn"
-                  onClick={() => api.bumpLog({ dateKey: todayKey, supplementId: s.id, delta: 1 })}
-                >
-                  +1
-                </button>
-                <button
-                  type="button"
-                  className="supQuickBtn"
-                  onClick={() => api.bumpLog({ dateKey: todayKey, supplementId: s.id, delta: 0.5 })}
-                >
-                  +0.5
-                </button>
-                <button
-                  type="button"
-                  className="supQuickBtnGhost"
-                  onClick={() =>
-                    api.upsertLogForDay({ dateKey: todayKey, supplementId: s.id, amount: s.default_amount || 1 })
-                  }
-                >
-                  Varsayılan
-                </button>
+              <div className="protocolStitchWeek" role="group" aria-label="Hafta — gün gün işaretle">
+                {weekDays.map(({ key: dKey, date }) => {
+                  const checked = doneDays.has(dKey)
+                  const isStripToday = dKey === todayKey
+                  return (
+                    <button
+                      key={`${s.id}-${dKey}`}
+                      type="button"
+                      className={`protocolStitchDay supWeekDayBtn ${checked ? 'isOn' : ''} ${isStripToday ? 'isToday' : ''}`}
+                      title={dKey}
+                      aria-pressed={checked}
+                      onClick={() => void toggleDayLogForDate(s, dKey)}
+                    >
+                      <span className="protocolStitchDayDow">{getTrWeekdayShort(date)}</span>
+                      <span className="protocolStitchDayDom">{date.getDate()}</span>
+                    </button>
+                  )
+                })}
               </div>
-
-              <div className="supRow">
-                <span className="supRowLbl">Stok</span>
-                <span className="supRowVal">{s.inventory_count == null ? '—' : `${s.inventory_count} ${s.unit}`}</span>
-              </div>
-            </div>
+            </article>
           )
         })}
       </div>
 
-      <div className="supFoot">
-        <span className="supFootLbl">Streak</span>
-        <div className="supStreak">
-          {api.last7.map((k) => {
-            const done = (api.getLogsForDay(k) || []).some((r) => Number(r.amount) > 0)
-            return <span key={k} className={done ? 'supDay supDayOn' : 'supDay'} title={k} />
-          })}
+      {activeSupplements.length === 0 && !api.loading ? (
+        <p className="supMuted">
+          {archivedSupplements.length
+            ? 'Aktif takviye yok. Arşivden geri alabilir veya sağ üstteki + ile ekleyebilirsin.'
+            : 'Henüz takviye yok. Sağ üstteki + ile ekleyebilirsin.'}
+        </p>
+      ) : null}
+
+      {archivedSupplements.length ? (
+        <div className="supArchiveBlock">
+          <p className="supArchiveHeading">Arşiv</p>
+          <ul className="supArchiveList">
+            {archivedSupplements.map((s) => (
+              <li key={s.id} className="supArchiveRow">
+                <span className="supArchiveName">{s.name}</span>
+                <div className="supArchiveActions">
+                  <button
+                    type="button"
+                    className="supTplBtnGhost"
+                    onClick={() => api.updateSupplement(s.id, { archived: false })}
+                  >
+                    Geri al
+                  </button>
+                  <button
+                    type="button"
+                    className="supTplBtnGhost"
+                    onClick={() => {
+                      setAddOpen(false)
+                      setDetailId(s.id)
+                    }}
+                  >
+                    Detay
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
+      ) : null}
+
+      <SupplementAddSheet api={api} open={addOpen} onClose={() => setAddOpen(false)} />
+
+      {detailSup ? (
+        <SupplementDetailPanel
+          s={detailSup}
+          selectedDateKey={todayKey}
+          api={api}
+          onClose={() => setDetailId(null)}
+          onDelete={(id) => api.deleteSupplement(id)}
+        />
+      ) : null}
     </div>
   )
 }

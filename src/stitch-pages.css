@@ -1718,6 +1718,38 @@
   margin-bottom: 1.25rem;
 }
 
+.supTopSolo {
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.supTopWithAct {
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.supFabAdd {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(249, 115, 22, 0.65);
+  background: rgba(249, 115, 22, 0.14);
+  color: #fff;
+  cursor: pointer;
+}
+
+.supFabAdd:hover {
+  background: rgba(249, 115, 22, 0.28);
+  border-color: rgba(249, 115, 22, 0.85);
+}
+
+.supFabAdd .material-symbols-outlined {
+  font-size: 1.35rem !important;
+}
+
 .supTitle,
 .nutTitle {
   margin: 0;
@@ -1738,18 +1770,441 @@
   color: #94a3b8;
 }
 
-.supAdd {
+/* Takviye ekleme: + ile açılan sheet (.supAddSheetForm) */
+.supAddSheetForm {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.supAddSheetForm .supInput,
+.supAddSheetForm select.supInput {
+  width: 100%;
+  min-width: 0;
+}
+
+.supAddSheetPair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+@media (max-width: 380px) {
+  .supAddSheetPair {
+    grid-template-columns: 1fr;
+  }
+}
+
+.supInvToggleSheet {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.supAddSheetFooter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.supAmtBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.supAmtPickLbl {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.supAmtSelectRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.supAmtSelectRow .supInput.supSmall:first-of-type {
+  min-width: 5.5rem;
+}
+
+.supAmtOtherInput {
+  flex: 1;
+  min-width: 6rem;
+  max-width: 10rem;
+}
+
+.supAmtBlockSelect .supAmtPickLbl {
+  margin-bottom: 0.1rem;
+}
+
+/* Ekleme formu: tek grid hücresi, diğer alanlarla yan yana */
+.supAmtBlockInline {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.supAmtSelectRowInline {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 0.35rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.supAmtSelectRowInline select.supInput.supSmall {
+  flex: 0 1 auto;
+  width: auto;
+  min-width: 3.5rem;
+  max-width: 5.5rem;
+}
+
+.supAmtSelectRowInline .supAmtOtherInput {
+  flex: 1 1 0;
+  min-width: 2.5rem;
+  max-width: 5rem;
+}
+
+.supTplForm .supAmtBlock {
+  margin-top: 0.15rem;
+}
+
+.supInvToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--dash-bg-deep);
+  color: #cbd5e1;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.supDayNav {
+  flex-shrink: 0;
+}
+
+.supWeekStrip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
   margin-bottom: 1.25rem;
 }
 
-@media (min-width: 768px) {
-  .supAdd {
-    grid-template-columns: 2.2fr 1fr 1fr 1fr 0.6fr 1fr auto;
-    align-items: center;
+.supWeekCell {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--dash-bg-deep);
+  color: #94a3b8;
+  padding: 0.5rem 0.25rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  font-size: 0.65rem;
+}
+
+.supWeekCellOn {
+  border-color: rgba(249, 115, 22, 0.65);
+  background: rgba(249, 115, 22, 0.1);
+  color: #fff;
+}
+
+.supWeekD {
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.55rem;
+}
+
+.supWeekN {
+  font-family: var(--font-headline);
+  font-weight: 900;
+  font-size: 0.85rem;
+}
+
+.supMuted {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-bottom: 0.75rem;
+}
+
+.supCardTools {
+  display: flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.supBadge {
+  display: inline-block;
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 900;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+.supBadgeOn {
+  border-color: rgba(249, 115, 22, 0.45);
+  color: #fdba74;
+}
+
+.supMetaSep {
+  margin: 0 0.35rem;
+  opacity: 0.4;
+}
+
+.supTplHint {
+  font-weight: 400;
+  color: #64748b;
+}
+
+.supInvStockBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.supInvStockInputs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.supInvStockInputsSheet {
+  flex-direction: row;
+}
+
+.supInvStockAmt {
+  flex: 1;
+  min-width: 6rem;
+}
+
+.supInvStockUnit {
+  min-width: 5rem;
+}
+
+.supInvStockCustom {
+  flex: 1 1 100%;
+  min-width: 8rem;
+}
+
+.supInvInfoBtn {
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.35rem;
+  background: rgba(0, 0, 0, 0.2);
+  color: #94a3b8;
+  cursor: help;
+}
+
+.supInvInfoBtn .material-symbols-outlined {
+  font-size: 1.1rem;
+}
+
+.supInvNote {
+  margin: 0;
+  font-size: 0.62rem;
+  line-height: 1.35;
+  color: #64748b;
+}
+
+.supIntakeBlock {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.65rem 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 0.35rem;
+}
+
+.supIntakeLead {
+  margin-bottom: 0.1rem;
+}
+
+.supIntakeDowRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.supIntakeDowBtn {
+  min-width: 2.35rem;
+  padding: 0.45rem 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.35rem;
+  background: rgba(0, 0, 0, 0.2);
+  color: #94a3b8;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.supIntakeDowBtn.isOn {
+  border-color: rgba(99, 102, 241, 0.55);
+  background: rgba(99, 102, 241, 0.22);
+  color: #e0e7ff;
+}
+
+.supDetailWeekStrip {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.3rem;
+  align-items: stretch;
+  margin: 0 0 1rem;
+}
+
+.supDetailWeekStrip .supDetailWeek {
+  margin: 0;
+  padding: 0.65rem 0.35rem 0.85rem;
+  min-width: 0;
+}
+
+.supDetailWeekNavBtn {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  min-width: 2.1rem;
+  padding: 0 0.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.25);
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.supDetailWeekNavBtn:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+
+.supDetailWeekNavBtn .material-symbols-outlined {
+  font-size: 1.35rem;
+}
+
+/* Detay sheet: tam genişlik miktar (tik kaldırıldı) */
+.supDetailDayAmtInput {
+  width: 100%;
+}
+
+/* Kaydet / Varsayılan — basış hissi (hafif sıkış + titreşim desteği JS ile) */
+@keyframes supDetailBtnAck {
+  0% {
+    transform: scale(1);
   }
+  38% {
+    transform: scale(0.94);
+  }
+  72% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+button.supDetailActionAck {
+  animation: supDetailBtnAck 0.42s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+
+button.supDetailActionBtn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.supDayAmt {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.supDayAmtLbl {
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 900;
+}
+
+.supDayAmtInput {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--dash-bg-deep);
+  color: #f8fafc;
+  padding: 0.65rem 0.75rem;
+  font-family: var(--font-headline);
+  font-weight: 900;
+  font-size: 1.1rem;
+}
+
+.supTplForm {
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: grid;
+  gap: 0.65rem;
+}
+
+.supTplK {
+  margin: 0;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  font-weight: 900;
+}
+
+.supTplRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .supTplRow {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.supTplActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.supTplBtnGhost {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: #cbd5e1;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .supInput,
@@ -1944,6 +2399,330 @@
 .supDayOn {
   background: rgba(249, 115, 22, 0.22);
   border-color: rgba(249, 115, 22, 0.7);
+}
+
+/* Takviye: habit satırı + detay sheet */
+.supHabitList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Hafta günleri: gerçek <button> — kontrollü checkbox yerine güvenilir tıklama */
+button.supWeekDayBtn.protocolStitchDay {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  width: 100%;
+  min-width: 0;
+}
+
+button.supWeekDayBtn.protocolStitchDay:focus-visible {
+  outline: 2px solid rgba(234, 88, 12, 0.75);
+  outline-offset: 1px;
+}
+
+.supStitchMainTight {
+  flex-wrap: nowrap;
+}
+
+.supHabitOpen {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+
+.supHabitOpen:focus-visible {
+  outline: 2px solid rgba(234, 88, 12, 0.85);
+  outline-offset: 2px;
+}
+
+button.supProtoTitleBtn {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+button.supProtoTitleBtn:focus-visible {
+  outline: 2px solid rgba(234, 88, 12, 0.85);
+  outline-offset: 2px;
+}
+
+.supDetailWeek {
+  margin: 0 0 1rem;
+  padding: 0.65rem 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+}
+
+button.supDetailDayPick {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+button.supDetailDayPick:focus-visible {
+  outline: 2px solid rgba(234, 88, 12, 0.55);
+  outline-offset: 1px;
+}
+
+/* Detay sheet: bu takviye için kaydı olan günler (liste satırındaki tik ile uyumlu) */
+button.supDetailDayPick.supDetailDayHasLog {
+  background: rgba(234, 88, 12, 0.22);
+  border: 1px solid rgba(234, 88, 12, 0.5);
+}
+
+/* Optimistik + gerçek kayıt iki karede gelince border/arka plan tween’i “titreme” yapmasın */
+.supDetailWeek button.supDetailDayPick.protocolStitchDay {
+  transition: none;
+}
+
+.supDetailWeek button.supDetailDayPick.protocolStitchDay:hover {
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+
+.supMetaAmt {
+  font-family: var(--font-headline);
+  font-weight: 900;
+  color: #ea580c;
+}
+
+.supArchiveBlock {
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.supArchiveHeading {
+  margin: 0 0 0.75rem;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.supArchiveList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.supArchiveRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.supArchiveName {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.supArchiveActions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.35rem;
+}
+
+.supDetailWrap {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  pointer-events: none;
+}
+
+.supDetailWrap > * {
+  pointer-events: auto;
+}
+
+.supDetailBackdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  margin: 0;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.62);
+  cursor: pointer;
+}
+
+.supDetailSheet {
+  position: relative;
+  width: 100%;
+  max-width: 32rem;
+  max-height: min(92vh, 44rem);
+  overflow-y: auto;
+  background: var(--dash-surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: none;
+  padding: 1.25rem 1.25rem 1.5rem;
+  box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.55);
+}
+
+@media (min-width: 640px) {
+  .supDetailWrap {
+    align-items: center;
+    padding: 1rem;
+  }
+
+  .supDetailSheet {
+    border-radius: 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-height: min(88vh, 40rem);
+  }
+}
+
+.supDetailHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.supDetailTitle {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #f8fafc;
+  line-height: 1.2;
+}
+
+.supDetailClose {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #cbd5e1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.supDetailClose:hover {
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.supDetailSub {
+  margin: 0.5rem 0 1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.supDetailDose {
+  color: #94a3b8;
+}
+
+.supDetailLbl {
+  display: block;
+  margin: 0 0 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.supDetailHint {
+  margin: 0.45rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #64748b;
+}
+
+.supDetailActions {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.supBtnSmall {
+  padding: 0.55rem 0.85rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+}
+
+.supDetailSaveAmt {
+  margin-left: auto;
+}
+
+.supDetailDivider {
+  margin: 1.25rem 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.supDetailArchive {
+  margin-top: 0.5rem;
+}
+
+.supDetailDangerZone {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.supDangerText {
+  color: rgba(248, 113, 113, 0.95) !important;
+}
+
+.supBtnGhost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
+}
+
+.supBtnGhost:hover:not(:disabled) {
+  border-color: rgba(234, 88, 12, 0.55);
+  color: #fff;
 }
 
 .nutNav {

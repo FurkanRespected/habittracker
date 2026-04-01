@@ -120,10 +120,46 @@ create table if not exists public.supplements (
   default_amount numeric not null default 1, -- e.g. 1 ölçek
   dose_per_unit numeric null, -- e.g. 5 (per unit)
   dose_unit text null, -- e.g. g, mg, IU
-  inventory_count numeric null, -- remaining units/servings
+  inventory_amount numeric null, -- optional: remaining amount
+  inventory_unit text null, -- optional: g/adet/kapsül/etc.
+  archived boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Safe alters for existing projects
+alter table public.supplements add column if not exists inventory_amount numeric null;
+alter table public.supplements add column if not exists inventory_unit text null;
+alter table public.supplements add column if not exists archived boolean not null default false;
+
+-- İsteğe bağlı alış sıklığı (hatırlatıcıdan bağımsız; web bildirimi şimdilik yok)
+alter table public.supplements add column if not exists intake_enabled boolean not null default false;
+alter table public.supplements add column if not exists intake_mode text null;
+-- intake_mode = weekly: 0=Pazar … 6=Cumartesi (Date.getDay)
+alter table public.supplements add column if not exists intake_weekly_day smallint null;
+-- intake_mode = custom_days: örn. [1,3,5]
+alter table public.supplements add column if not exists intake_custom_days jsonb null;
+-- intake_mode = every_3_days: başlangıç tarihi (YYYY-MM-DD)
+alter table public.supplements add column if not exists intake_interval_anchor date null;
+
+-- İleride hatırlatıcı (ayrı zaman/saat vb.) için rezerve; şu an uygulama yazmıyor
+alter table public.supplements add column if not exists reminder_enabled boolean not null default false;
+alter table public.supplements add column if not exists reminder_mode text null;
+alter table public.supplements add column if not exists reminder_time_local time null;
+alter table public.supplements add column if not exists reminder_weekly_day smallint null;
+alter table public.supplements add column if not exists reminder_custom_days jsonb null;
+alter table public.supplements add column if not exists reminder_interval_anchor date null;
+
+-- Eski tek şemadan geçiş: reminder dolu, intake boşsa bir kez kopyala
+update public.supplements
+set
+  intake_enabled = reminder_enabled,
+  intake_mode = reminder_mode,
+  intake_weekly_day = reminder_weekly_day,
+  intake_custom_days = reminder_custom_days,
+  intake_interval_anchor = reminder_interval_anchor
+where intake_mode is null
+  and reminder_mode is not null;
 
 create index if not exists supplements_user_id_idx on public.supplements (user_id);
 

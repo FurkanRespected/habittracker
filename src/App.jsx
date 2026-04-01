@@ -23,7 +23,7 @@ function App() {
   const [habits, setHabits] = useLocalStorage('habits', [])
   const { session, loading, enabled } = useSupabaseSession()
   const cloud = useCloudHabits({ session, checksLookbackDays: 400 })
-  const cloudSupplements = useCloudSupplements({ session, logsLookbackDays: 30 })
+  const cloudSupplements = useCloudSupplements({ session, logsLookbackDays: 400 })
   const cloudNutrition = useCloudNutrition({ session, lookbackDays: 30 })
 
   async function signOut() {
