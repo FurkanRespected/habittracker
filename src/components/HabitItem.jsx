@@ -39,6 +39,8 @@ export default function HabitItem({
 
   const stitchIcon = useMemo(() => protocolStitchIcon(habit.id), [habit.id])
 
+  const last7Days = useMemo(() => getLastNDays(7, new Date()), [])
+
   const streakStrength = Math.max(0, Math.min(1, stats.currentStreak / 14))
   const streakStyle = useMemo(() => {
     const bg = 0.12 + streakStrength * 0.18
@@ -128,6 +130,28 @@ export default function HabitItem({
               )}
             </button>
           </div>
+        </div>
+        <div className="protocolStitchWeek" role="group" aria-label="Son 7 gün">
+          {last7Days.map((d) => {
+            const checked = Boolean(habit.history?.[d.key])
+            const isToday = d.key === todayKey
+            return (
+              <label
+                key={d.key}
+                className={`protocolStitchDay ${checked ? 'isOn' : ''} ${isToday ? 'isToday' : ''}`}
+                title={d.key}
+              >
+                <span className="protocolStitchDayDow">{getTrWeekdayShort(d.date)}</span>
+                <span className="protocolStitchDayDom">{d.date.getDate()}</span>
+                <input
+                  type="checkbox"
+                  className="protocolStitchDayInput"
+                  checked={checked}
+                  onChange={() => onToggleDay(habit.id, d.key, !checked)}
+                />
+              </label>
+            )
+          })}
         </div>
       </article>
     )
