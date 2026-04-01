@@ -1,18 +1,23 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import './App.css'
 import './monolith.css'
+import './stitch-pages.css'
 import AppShell from './components/AppShell.jsx'
 import AuthForm from './components/AuthForm.jsx'
 import useLocalStorage from './hooks/useLocalStorage.js'
 import useCloudHabits from './hooks/useCloudHabits.js'
 import useSupabaseSession from './hooks/useSupabaseSession.js'
 import { supabase } from './lib/supabaseClient.js'
-import ComingSoonPage from './pages/ComingSoonPage.jsx'
+import CommunityPage from './pages/CommunityPage.jsx'
 import HabitDetailPage from './pages/HabitDetailPage.jsx'
 import HomePage from './pages/HomePage.jsx'
+import InsightsPage from './pages/InsightsPage.jsx'
+import MissionPage from './pages/MissionPage.jsx'
+import TrainingPage from './pages/TrainingPage.jsx'
 import { maxStreakAcrossHabits } from './utils/dashboardUtils.js'
 
 function App() {
+  const navigate = useNavigate()
   const [habits, setHabits] = useLocalStorage('habits', [])
   const { session, loading, enabled } = useSupabaseSession()
   const cloud = useCloudHabits({ session, checksLookbackDays: 400 })
@@ -56,7 +61,7 @@ function App() {
   const activeHasHabits = activeHabits.length > 0
 
   function logActivity() {
-    document.getElementById('protocol-add')?.scrollIntoView({ behavior: 'smooth' })
+    navigate('/mission')
   }
 
   if (enabled && loading) {
@@ -111,6 +116,8 @@ function App() {
           error: '',
         }
 
+  const addForMission = enabled && session ? cloud.addHabit : addHabit
+
   return (
     <Routes>
       <Route
@@ -137,10 +144,7 @@ function App() {
         path="/insights"
         element={
           <AppShell {...shellProps}>
-            <ComingSoonPage
-              title="INSIGHTS"
-              subtitle="Performans özeti ve heatmap yakında."
-            />
+            <InsightsPage habits={activeHabits} />
           </AppShell>
         }
       />
@@ -148,7 +152,7 @@ function App() {
         path="/community"
         element={
           <AppShell {...shellProps}>
-            <ComingSoonPage title="COMMUNITY" subtitle="Topluluk özellikleri yakında." />
+            <CommunityPage habits={activeHabits} />
           </AppShell>
         }
       />
@@ -156,7 +160,15 @@ function App() {
         path="/training"
         element={
           <AppShell {...shellProps}>
-            <ComingSoonPage title="TRAINING" subtitle="Antrenman modülü yakında." />
+            <TrainingPage habits={activeHabits} />
+          </AppShell>
+        }
+      />
+      <Route
+        path="/mission"
+        element={
+          <AppShell {...shellProps}>
+            <MissionPage onAddHabit={addForMission} />
           </AppShell>
         }
       />

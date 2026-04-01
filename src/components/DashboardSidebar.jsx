@@ -1,19 +1,44 @@
 import { buildMergedHeatmap, todayCompletionStats } from '../utils/dashboardUtils.js'
 import { toDateKey } from '../utils/dateUtils.js'
 
+const R = 88
+const CIRC = 2 * Math.PI * R
+
 export function ProtocolCompletionCard({ habits }) {
   const todayKey = toDateKey(new Date())
   const { done, total, pct } = todayCompletionStats(habits, todayKey)
+  const dashOffset = total ? CIRC * (1 - pct / 100) : CIRC
 
   return (
     <div className="dashCard dashCardPad">
       <h3 className="dashCardTitle">Protokol tamamlanma</h3>
-      <div className="dashRingWrap" style={{ '--ring-pct': pct }}>
-        <div className="dashRing">
-          <div className="dashRingHole">
-            <span className="dashRingPct">{total ? `${pct}%` : '—'}</span>
-            <span className="dashRingSub">bugün</span>
-          </div>
+      <div className="dashSvgRingWrap">
+        <svg className="dashSvgRingSvg" viewBox="0 0 192 192" aria-hidden="true">
+          <g transform="rotate(-90 96 96)">
+            <circle
+              cx="96"
+              cy="96"
+              r={R}
+              fill="transparent"
+              stroke="rgba(15, 23, 42, 0.95)"
+              strokeWidth="4"
+            />
+            <circle
+              cx="96"
+              cy="96"
+              r={R}
+              fill="transparent"
+              stroke="#d97706"
+              strokeWidth="8"
+              strokeDasharray={CIRC}
+              strokeDashoffset={dashOffset}
+              strokeLinecap="butt"
+            />
+          </g>
+        </svg>
+        <div className="dashSvgRingLabel">
+          <span>{total ? `${pct}%` : '—'}</span>
+          <span>bugün</span>
         </div>
       </div>
       <p className="dashMilestone">
@@ -28,6 +53,9 @@ export function ProtocolCompletionCard({ habits }) {
           'Henüz protokol yok'
         )}
       </p>
+      <div className="dashProtoBarTrack">
+        <div className="dashProtoBarFill" style={{ width: `${total ? pct : 0}%` }} />
+      </div>
     </div>
   )
 }
@@ -38,7 +66,7 @@ export function ExecutionHeatmapCard({ habits }) {
   return (
     <div className="dashCard dashCardPad">
       <div className="dashHeatmapHead">
-        <h3 className="dashCardTitle">Yürütme geçmişi</h3>
+        <h3 className="dashCardTitle dashHeatTitle">Yürütme geçmişi</h3>
         <div className="dashHeatmapLegend">
           <span>Düşük</span>
           <div className="dashLegendCells">
@@ -51,13 +79,17 @@ export function ExecutionHeatmapCard({ habits }) {
           <span>Yüksek</span>
         </div>
       </div>
-      <div className="dashHeatmapGrid" role="img" aria-label="Son haftalar birleşik aktivite">
+      <div
+        className="dashHeatmapGrid dashHeatmapGrid7"
+        role="img"
+        aria-label="Son haftalar birleşik aktivite"
+      >
         {cells.map((c) => (
           <span key={c.key} className={`heatCell heatL${c.level}`} title={c.key} />
         ))}
       </div>
       <div className="dashHeatmapFoot">
-        <span>Başlangıç</span>
+        <span>Döngü başı</span>
         <span>Bugün</span>
       </div>
     </div>
