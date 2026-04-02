@@ -1,25 +1,52 @@
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import { Suspense, lazy } from 'react'
+import { Link, Navigate, Route, Routes } from 'react-router-dom'
 import './App.css'
 import './monolith.css'
 import './stitch-pages.css'
 import AppShell from './components/AppShell.jsx'
 import AuthForm from './components/AuthForm.jsx'
+import RouteFallback from './components/RouteFallback.jsx'
+import { PanelWidgetsProvider } from './hooks/usePanelWidgets.jsx'
+import useAppearancePreferences from './hooks/useAppearancePreferences.js'
 import useLocalStorage from './hooks/useLocalStorage.js'
 import useCloudHabits from './hooks/useCloudHabits.js'
 import useCloudNutrition from './hooks/useCloudNutrition.js'
 import useCloudSupplements from './hooks/useCloudSupplements.js'
 import useSupabaseSession from './hooks/useSupabaseSession.js'
-import { supabase } from './lib/supabaseClient.js'
-import CommunityPage from './pages/CommunityPage.jsx'
-import HabitDetailPage from './pages/HabitDetailPage.jsx'
+import {
+  LazyCommunityPage,
+  LazyHabitDetailPage,
+  LazyProfilePage,
+  LazyProtocolsPage,
+  LazySettingsPage,
+  LazyTrainingLogOutlet,
+  LazyTrainingNutritionOutlet,
+  LazyTrainingOverviewOutlet,
+  LazyTrainingPage,
+  LazyTrainingSupplementsOutlet,
+  LazyTasksPage,
+  LazyFocusPage,
+} from './lazyPages.jsx'
 import HomePage from './pages/HomePage.jsx'
-import InsightsPage from './pages/InsightsPage.jsx'
-import MissionPage from './pages/MissionPage.jsx'
-import TrainingPage from './pages/TrainingPage.jsx'
+import { supabase } from './lib/supabaseClient.js'
 import { maxStreakAcrossHabits } from './utils/dashboardUtils.js'
 
+const LazyLandingPage = lazy(() => import('./pages/LandingPage.jsx'))
+
+function GuestAuthScreen({ mode }) {
+  return (
+    <main className="authPage">
+      <div className="authPageInner">
+        <Link to="/" className="textButton authBackLink">
+          ← Ana sayfa
+        </Link>
+        <AuthForm key={mode} initialMode={mode} />
+      </div>
+    </main>
+  )
+}
+
 function App() {
-  const navigate = useNavigate()
   const [habits, setHabits] = useLocalStorage('habits', [])
   const { session, loading, enabled } = useSupabaseSession()
   const cloud = useCloudHabits({ session, checksLookbackDays: 400 })
@@ -63,10 +90,7 @@ function App() {
   const activeHabits = enabled && session ? cloud.habits : habits
   const streakMax = maxStreakAcrossHabits(activeHabits)
   const activeHasHabits = activeHabits.length > 0
-
-  function logActivity() {
-    navigate('/mission')
-  }
+  const appearance = useAppearancePreferences()
 
   if (enabled && loading) {
     return (
@@ -78,16 +102,15 @@ function App() {
 
   if (enabled && !session) {
     return (
-      <Routes>
-        <Route
-          path="*"
-          element={
-            <main className="authPage">
-              <AuthForm />
-            </main>
-          }
-        />
-      </Routes>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/" element={<LazyLandingPage />} />
+          <Route path="/welcome" element={<Navigate to="/" replace />} />
+          <Route path="/login" element={<GuestAuthScreen mode="signin" />} />
+          <Route path="/signup" element={<GuestAuthScreen mode="signup" />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     )
   }
 
@@ -98,7 +121,6 @@ function App() {
     streakDays: streakMax,
     userLabel,
     onSignOut: enabled && session ? signOut : undefined,
-    onLogActivity: logActivity,
   }
 
   const homeHandlers =
@@ -120,12 +142,20 @@ function App() {
           error: '',
         }
 
-  const addForMission = enabled && session ? cloud.addHabit : addHabit
+  const protocolPageProps = {
+    habits: activeHabits,
+    hasHabits: activeHasHabits,
+    emptyHint: 'İlkini ekleyebilirsin.',
+    ...homeHandlers,
+  }
 
   return (
+    <PanelWidgetsProvider>
+    <Suspense fallback={<RouteFallback />}>
     <Routes>
+      <Route path="/" element={<Navigate to="/panel" replace />} />
       <Route
-        path="/"
+        path="/panel"
         element={
           <AppShell {...shellProps}>
             {!enabled ? (
@@ -145,10 +175,10 @@ function App() {
         }
       />
       <Route
-        path="/insights"
+        path="/protocols"
         element={
           <AppShell {...shellProps}>
-            <InsightsPage habits={activeHabits} />
+            <LazyProtocolsPage {...protocolPageProps} />
           </AppShell>
         }
       />
@@ -156,7 +186,23 @@ function App() {
         path="/community"
         element={
           <AppShell {...shellProps}>
-            <CommunityPage habits={activeHabits} />
+            <LazyCommunityPage habits={activeHabits} />
+          </AppShell>
+        }
+      />
+      <Route
+        path="/tasks"
+        element={
+          <AppShell {...shellProps}>
+            <LazyTasksPage />
+          </AppShell>
+        }
+      />
+      <Route
+        path="/focus"
+        element={
+          <AppShell {...shellProps}>
+            <LazyFocusPage />
           </AppShell>
         }
       />
@@ -164,19 +210,44 @@ function App() {
         path="/training"
         element={
           <AppShell {...shellProps}>
-            <TrainingPage
+            <LazyTrainingPage
               habits={activeHabits}
               supplementsApi={enabled && session ? cloudSupplements : null}
               nutritionApi={enabled && session ? cloudNutrition : null}
             />
           </AppShell>
         }
-      />
+      >
+        <Route index element={<LazyTrainingOverviewOutlet />} />
+        <Route path="log" element={<LazyTrainingLogOutlet />} />
+        <Route path="supplements" element={<LazyTrainingSupplementsOutlet />} />
+        <Route path="nutrition" element={<LazyTrainingNutritionOutlet />} />
+        <Route path="*" element={<Navigate to="/training" replace />} />
+      </Route>
       <Route
-        path="/mission"
+        path="/profile"
         element={
           <AppShell {...shellProps}>
-            <MissionPage onAddHabit={addForMission} />
+            <LazyProfilePage
+              userLabel={userLabel}
+              sessionEmail={session?.user?.email ?? ''}
+              hasCloud={Boolean(enabled && session)}
+              habitCount={activeHabits.length}
+              streakDays={streakMax}
+            />
+          </AppShell>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <AppShell {...shellProps}>
+            <LazySettingsPage
+              hasCloud={Boolean(enabled && session)}
+              exportHabits={activeHabits}
+              sessionEmail={session?.user?.email ?? ''}
+              appearance={appearance}
+            />
           </AppShell>
         }
       />
@@ -184,15 +255,18 @@ function App() {
         path="/habit/:id"
         element={
           <AppShell {...shellProps}>
-            <HabitDetailPage
+            <LazyHabitDetailPage
               habits={activeHabits}
               onToggleDay={enabled && session ? cloud.toggleHabitDay : toggleHabitDay}
             />
           </AppShell>
         }
       />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="/welcome" element={<Navigate to="/panel" replace />} />
+      <Route path="*" element={<Navigate to="/panel" replace />} />
     </Routes>
+    </Suspense>
+    </PanelWidgetsProvider>
   )
 }
 

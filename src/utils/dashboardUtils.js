@@ -16,6 +16,20 @@ export function maxStreakAcrossHabits(habits) {
   return Math.max(...habits.map((h) => getCurrentStreakForHistory(h.history || {})))
 }
 
+export function totalVolumeKgFromExercises(exercises) {
+  if (!Array.isArray(exercises)) return 0
+  return exercises.reduce((sum, ex) => {
+    const vol = (ex.sets || []).reduce((s, set) => {
+      const w = Number(String(set.weightKg || '').replace(',', '.'))
+      const r = Number(String(set.reps || '').replace(',', '.'))
+      if (!Number.isFinite(w) || !Number.isFinite(r)) return s
+      if (w <= 0 || r <= 0) return s
+      return s + w * r
+    }, 0)
+    return sum + vol
+  }, 0)
+}
+
 export function todayCompletionStats(habits, todayKey = toDateKey(new Date())) {
   const total = habits?.length ?? 0
   if (!total) return { done: 0, total: 0, pct: 0 }

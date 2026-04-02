@@ -35,7 +35,7 @@ export default function HabitDetailPage({ habits, onToggleDay }) {
     return (
       <div className="dashDetailPage">
         <div className="dashEmpty">
-          Alışkanlık bulunamadı. <Link className="textButton" to="/">Geri dön</Link>
+          Alışkanlık bulunamadı. <Link className="textButton" to="/panel">Geri dön</Link>
         </div>
       </div>
     )
@@ -47,7 +47,7 @@ export default function HabitDetailPage({ habits, onToggleDay }) {
     <div className="dashDetailPage">
       <header className="dashDetailHead">
         <div className="dashDetailTop">
-          <Link className="textButton" to="/">
+          <Link className="textButton" to="/panel">
             ← Geri
           </Link>
           <div className="detailActions">

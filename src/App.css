@@ -170,6 +170,16 @@
   outline-offset: 2px;
 }
 
+.buttonGhost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.22);
+  color: rgba(248, 250, 252, 0.92);
+}
+
+.buttonGhost:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
 .habitList {
   display: grid;
   gap: 10px;

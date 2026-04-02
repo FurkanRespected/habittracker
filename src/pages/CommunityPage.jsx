@@ -149,6 +149,9 @@ export default function CommunityPage({ habits }) {
 
           <div className="comFeed">
             <h3>İstihbarat akışı</h3>
+            <p className="comFeedNote">
+              Örnek içerik. Canlı feed için <code>community_posts</code> tablosu (şema) kullanılacak.
+            </p>
             <div className="comFeedList">
               {FEED.map((item, i) => (
                 <div key={i} className="comFeedItem">

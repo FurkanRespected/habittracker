@@ -306,3 +306,103 @@ for delete
 to authenticated
 using (user_id = auth.uid());
 
+-- ---------------------------------------------------------------------------
+-- Gelecek: oyunlaştırma, topluluk, koçluk (istek.md §2.E, §3.1)
+-- Aşağıdaki tablolar henüz uygulama tarafından kullanılmıyor; migrasyon sırasında
+-- tek tek açılıp RLS ile test edilmeli.
+--
+-- xp_events (user_id, source text, points int, meta jsonb, created_at)
+--   Kaynak: focus_timer | habit_done | workout | quest | admin
+--
+-- community_posts (id, author_id, body, kind, created_at)
+--   Feed satırları; kind: medal | workout | protocol | system
+--
+-- coach_clients (coach_id, client_id, status, created_at)
+--   Koç onayı + marketplace satın alma sonrası ilişki
+--
+-- marketplace_listings (coach_id, title, price_cents, stripe_price_id, active)
+--
+-- profiles genişletme: display_name, coach_tier, xp_level
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.xp_events (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  source text not null,
+  points integer not null,
+  meta jsonb,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists xp_events_user_id_idx on public.xp_events (user_id);
+
+alter table public.xp_events enable row level security;
+
+drop policy if exists xp_events_select_own on public.xp_events;
+create policy xp_events_select_own
+on public.xp_events
+for select
+to authenticated
+using (user_id = auth.uid());
+
+drop policy if exists xp_events_insert_own on public.xp_events;
+create policy xp_events_insert_own
+on public.xp_events
+for insert
+to authenticated
+with check (user_id = auth.uid());
+
+create table if not exists public.community_posts (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  body text not null,
+  kind text not null default 'note',
+  created_at timestamptz not null default now()
+);
+
+create index if not exists community_posts_user_id_idx on public.community_posts (user_id);
+
+alter table public.community_posts enable row level security;
+
+drop policy if exists community_posts_select_authenticated on public.community_posts;
+create policy community_posts_select_authenticated
+on public.community_posts
+for select
+to authenticated
+using (true);
+
+drop policy if exists community_posts_insert_own on public.community_posts;
+create policy community_posts_insert_own
+on public.community_posts
+for insert
+to authenticated
+with check (user_id = auth.uid());
+
+create table if not exists public.coach_clients (
+  id uuid primary key default gen_random_uuid(),
+  coach_id uuid not null references auth.users (id) on delete cascade,
+  client_id uuid not null references auth.users (id) on delete cascade,
+  status text not null default 'pending',
+  created_at timestamptz not null default now(),
+  unique (coach_id, client_id)
+);
+
+create index if not exists coach_clients_coach_idx on public.coach_clients (coach_id);
+create index if not exists coach_clients_client_idx on public.coach_clients (client_id);
+
+alter table public.coach_clients enable row level security;
+
+drop policy if exists coach_clients_select_parties on public.coach_clients;
+create policy coach_clients_select_parties
+on public.coach_clients
+for select
+to authenticated
+using (coach_id = auth.uid() or client_id = auth.uid());
+
+drop policy if exists coach_clients_insert_coach on public.coach_clients;
+create policy coach_clients_insert_coach
+on public.coach_clients
+for insert
+to authenticated
+with check (coach_id = auth.uid());
+

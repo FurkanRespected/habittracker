@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { NavLink, Outlet, useOutletContext } from 'react-router-dom'
 import useLocalStorage from '../hooks/useLocalStorage.js'
 import { maxStreakAcrossHabits, protocolStitchIcon } from '../utils/dashboardUtils.js'
 import {
@@ -52,7 +53,29 @@ function formatKg(kg) {
   return `${Math.round(kg)} kg`
 }
 
-function WorkoutPanel({ habits, focusSec, running, onToggleTimer }) {
+function findLastBestWeightForName(trainingStore, focusDayKey, exerciseName) {
+  const name = String(exerciseName || '').trim().toLowerCase()
+  if (!name) return null
+  const all = trainingStore?.byDate || {}
+  const keys = Object.keys(all)
+    .filter((k) => k < focusDayKey)
+    .sort()
+    .reverse()
+  for (const k of keys) {
+    const exs = all[k]?.exercises || []
+    const match = exs.find((e) => String(e.name || '').trim().toLowerCase() === name)
+    if (!match) continue
+    let best = 0
+    for (const s of match.sets || []) {
+      const w = Number(String(s.weightKg || '').replace(',', '.'))
+      if (Number.isFinite(w) && w > best) best = w
+    }
+    if (best > 0) return { dateKey: k, weightKg: best }
+  }
+  return null
+}
+
+export function WorkoutPanel({ habits, focusSec, running, onToggleTimer }) {
   function makeExercise(seq) {
     return {
       id: newId(),
@@ -64,11 +87,14 @@ function WorkoutPanel({ habits, focusSec, running, onToggleTimer }) {
   }
 
   const streak = useMemo(() => maxStreakAcrossHabits(habits), [habits])
-  const todayKey = useMemo(() => toDateKey(new Date()), [])
+  const [focusDayKey, setFocusDayKey] = useState(() => toDateKey(new Date()))
   const [trainingStore, setTrainingStore] = useLocalStorage('training_store_v1', { byDate: {} })
-  const day = trainingStore.byDate?.[todayKey] || { exercises: [] }
+  const [tplStore, setTplStore] = useLocalStorage('workout_templates_v1', { templates: [] })
+  const [tplPick, setTplPick] = useState('')
+  const day = trainingStore.byDate?.[focusDayKey] || { exercises: [] }
   const exercises = useMemo(() => day.exercises || [], [day.exercises])
   const [historyFor, setHistoryFor] = useState(null)
+  const templates = tplStore?.templates || []
 
   const totalVolumeKg = useMemo(
     () => exercises.reduce((sum, ex) => sum + calcExerciseVolume(ex), 0),
@@ -83,14 +109,57 @@ function WorkoutPanel({ habits, focusSec, running, onToggleTimer }) {
     (updater) => {
       setTrainingStore((prev) => {
         const byDate = { ...(prev?.byDate || {}) }
-        const cur = byDate[todayKey] || { exercises: [] }
+        const cur = byDate[focusDayKey] || { exercises: [] }
         const nextDay = typeof updater === 'function' ? updater(cur) : updater
-        byDate[todayKey] = nextDay
+        byDate[focusDayKey] = nextDay
         return { ...(prev || {}), byDate }
       })
     },
-    [setTrainingStore, todayKey],
+    [setTrainingStore, focusDayKey],
   )
+
+  const seedDefaultTemplates = useCallback(() => {
+    setTplStore({
+      templates: [
+        {
+          id: newId(),
+          name: 'İtme',
+          exercises: [{ name: 'Bench press' }, { name: 'Omuz press' }, { name: 'Triceps' }],
+        },
+        {
+          id: newId(),
+          name: 'Çekme',
+          exercises: [{ name: 'Barfiks / lat' }, { name: 'Row' }, { name: 'Biceps' }],
+        },
+        {
+          id: newId(),
+          name: 'Bacak',
+          exercises: [{ name: 'Squat' }, { name: 'RDL' }, { name: 'Leg curl' }],
+        },
+      ],
+    })
+  }, [setTplStore])
+
+  const applyTemplate = useCallback(() => {
+    const t = templates.find((x) => x.id === tplPick)
+    if (!t?.exercises?.length) return
+    setDay((cur) => {
+      const list = [...(cur.exercises || [])]
+      let seq = list.length
+      for (const row of t.exercises) {
+        seq += 1
+        list.push({
+          id: newId(),
+          n: String(seq).padStart(2, '0'),
+          name: row.name || '',
+          rpe: '',
+          sets: [{ weightKg: '', reps: '' }],
+        })
+      }
+      const renum = list.map((e, idx) => ({ ...e, n: String(idx + 1).padStart(2, '0') }))
+      return { ...cur, exercises: renum }
+    })
+  }, [templates, tplPick, setDay])
 
   const addExercise = useCallback(() => {
     setDay((cur) => {
@@ -170,7 +239,7 @@ function WorkoutPanel({ habits, focusSec, running, onToggleTimer }) {
   const historyRows = useMemo(() => {
     if (!historyFor) return []
     const all = trainingStore.byDate || {}
-    const keys = Object.keys(all).filter((k) => k !== todayKey).sort().reverse()
+    const keys = Object.keys(all).filter((k) => k !== focusDayKey).sort().reverse()
     const rows = []
     for (const k of keys) {
       const dayX = all[k]
@@ -181,7 +250,7 @@ function WorkoutPanel({ habits, focusSec, running, onToggleTimer }) {
       if (rows.length >= 5) break
     }
     return rows
-  }, [historyFor, todayKey, trainingStore.byDate])
+  }, [historyFor, focusDayKey, trainingStore.byDate])
 
   return (
     <div className="trBento">
@@ -190,8 +259,45 @@ function WorkoutPanel({ habits, focusSec, running, onToggleTimer }) {
           <div>
             <h2>Günlük antrenman günlüğü</h2>
             <p className="trLogMeta">
-              Oturum: bugünün setleri · kayıt: {todayKey} · hacim: {totalTons ? totalTons : '—'}t
+              Kayıt günü: {focusDayKey} · hacim: {totalTons ? totalTons : '—'}t
             </p>
+            <div className="trLogToolbar">
+              <label className="trDateLbl">
+                Tarih
+                <input
+                  type="date"
+                  className="trDateInput"
+                  value={focusDayKey}
+                  onChange={(e) => {
+                    const v = e.target.value
+                    if (v) setFocusDayKey(v)
+                  }}
+                />
+              </label>
+              <div className="trTplRow">
+                <select
+                  className="trTplSelect"
+                  value={tplPick}
+                  onChange={(e) => setTplPick(e.target.value)}
+                  aria-label="Antrenman şablonu"
+                >
+                  <option value="">Şablon seç</option>
+                  {templates.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+                <button type="button" className="trTplBtn" onClick={applyTemplate}>
+                  Şablondan ekle
+                </button>
+                {templates.length === 0 ? (
+                  <button type="button" className="trTplBtn trTplBtnGhost" onClick={seedDefaultTemplates}>
+                    Varsayılan şablonlar
+                  </button>
+                ) : null}
+              </div>
+            </div>
           </div>
           <button type="button" className="trLogAdd" aria-label="Egzersiz ekle" onClick={addExercise}>
             <span className="material-symbols-outlined">add</span>
@@ -214,6 +320,14 @@ function WorkoutPanel({ habits, focusSec, running, onToggleTimer }) {
                           onChange={(e) => setExerciseField(ex.id, { name: e.target.value })}
                           placeholder="Egzersiz adı (örn. Deadlift)"
                         />
+                        {(() => {
+                          const hint = findLastBestWeightForName(trainingStore, focusDayKey, ex.name)
+                          return hint ? (
+                            <p className="trExHint">
+                              Önceki kayıt: <strong>{formatKg(hint.weightKg)}</strong> ({hint.dateKey})
+                            </p>
+                          ) : null
+                        })()}
                       </div>
                     </div>
                     <div className="trExMetaRow">
@@ -491,7 +605,7 @@ function SupplementIntakeScheduleFields({
     <>
       <label className="supInvToggle">
         <input type="checkbox" checked={enabled} onChange={(e) => onEnabled(e.target.checked)} />
-        <span>Alış sıklığı (isteğe bağlı)</span>
+        <span>Alış sıklığı</span>
       </label>
       {enabled ? (
         <div className="supIntakeBlock">
@@ -1365,7 +1479,7 @@ function SupplementAddSheet({ api, open, onClose }) {
   )
 }
 
-function SupplementsPanel({ api }) {
+export function SupplementsPanel({ api }) {
   const todayKey = toDateKey(new Date())
   const weekDays = useMemo(() => getLastNDays(7, new Date()), [todayKey])
   const [addOpen, setAddOpen] = useState(false)
@@ -1625,7 +1739,7 @@ function SupplementsPanel({ api }) {
   )
 }
 
-function NutritionPanel({ api }) {
+export function NutritionPanel({ api }) {
   const [shift, setShift] = useState(0)
   const dateKey = useMemo(() => toDateKey(addDays(new Date(), -shift)), [shift])
   const [macros, setMacros] = useState(false)
@@ -1754,8 +1868,65 @@ function NutritionEditor({ api, dateKey, day, macros, setMacros }) {
   )
 }
 
+function trTabClass({ isActive }) {
+  return `trTab${isActive ? ' trTabOn' : ''}`
+}
+
+export function TrainingOverviewOutlet() {
+  return (
+    <div className="trHubGrid">
+      <NavLink to="/training/log" className="trHubCard">
+        <span className="material-symbols-outlined trHubCardIco" aria-hidden="true">
+          fitness_center
+        </span>
+        <span className="trHubCardK">Spor</span>
+        <h3 className="trHubCardTitle">Antrenman günlüğü</h3>
+        <p className="trHubCardSub">Set, tekrar, hacim ve odak zamanlayıcı</p>
+      </NavLink>
+      <NavLink to="/training/supplements" className="trHubCard">
+        <span className="material-symbols-outlined trHubCardIco" aria-hidden="true">
+          medication
+        </span>
+        <span className="trHubCardK">Takviye</span>
+        <h3 className="trHubCardTitle">Takviye takibi</h3>
+        <p className="trHubCardSub">Günlük doz ve envanter (bulut oturumu)</p>
+      </NavLink>
+      <NavLink to="/training/nutrition" className="trHubCard">
+        <span className="material-symbols-outlined trHubCardIco" aria-hidden="true">
+          restaurant
+        </span>
+        <span className="trHubCardK">Beslenme</span>
+        <h3 className="trHubCardTitle">Kalori ve makrolar</h3>
+        <p className="trHubCardSub">Günlük kayıt ve özet (bulut oturumu)</p>
+      </NavLink>
+    </div>
+  )
+}
+
+export function TrainingLogOutlet() {
+  const { habits, focusSec, running, toggleTimer } = useOutletContext()
+  return <WorkoutPanel habits={habits} focusSec={focusSec} running={running} onToggleTimer={toggleTimer} />
+}
+
+export function TrainingSupplementsOutlet() {
+  const { supplementsApi } = useOutletContext()
+  return supplementsApi ? (
+    <SupplementsPanel api={supplementsApi} />
+  ) : (
+    <div className="trEmpty">Takviye verisi için oturum gerekli.</div>
+  )
+}
+
+export function TrainingNutritionOutlet() {
+  const { nutritionApi } = useOutletContext()
+  return nutritionApi ? (
+    <NutritionPanel api={nutritionApi} />
+  ) : (
+    <div className="trEmpty">Kalori verisi için oturum gerekli.</div>
+  )
+}
+
 export default function TrainingPage({ habits, supplementsApi, nutritionApi }) {
-  const [mode, setMode] = useState('workout')
   const [focusSec, setFocusSec] = useState(45 * 60)
   const [running, setRunning] = useState(false)
 
@@ -1777,6 +1948,33 @@ export default function TrainingPage({ habits, supplementsApi, nutritionApi }) {
     if (!Number.isFinite(totalVolumeKg) || totalVolumeKg <= 0) return 0
     return Math.round((totalVolumeKg / 1000) * 10) / 10
   }, [totalVolumeKg])
+
+  const volumeSeries7 = useMemo(() => {
+    const dates = getLastNDays(7, new Date())
+    const byDate = trainingStore.byDate || {}
+    return dates.map(({ key }) => {
+      const ex = byDate[key]?.exercises || []
+      return ex.reduce((s, e) => s + calcExerciseVolume(e), 0)
+    })
+  }, [trainingStore])
+  const maxVolBar = Math.max(...volumeSeries7, 1)
+
+  const disciplineHeat21 = useMemo(() => {
+    const keys = getLastNDays(21, new Date())
+      .map((d) => d.key)
+      .reverse()
+    const n = habits?.length || 0
+    if (!n) return keys.map(() => 0)
+    return keys.map((key) => {
+      let c = 0
+      for (const h of habits) {
+        if (h.history?.[key]) c++
+      }
+      return c / n
+    })
+  }, [habits])
+
+  const todayNutrition = nutritionApi?.getDay?.(todayKey) ?? null
 
   useEffect(() => {
     if (!running) return undefined
@@ -1801,6 +1999,18 @@ export default function TrainingPage({ habits, supplementsApi, nutritionApi }) {
     setRunning((r) => !r)
   }, [focusSec])
 
+  const outletContext = useMemo(
+    () => ({
+      habits,
+      focusSec,
+      running,
+      toggleTimer,
+      supplementsApi,
+      nutritionApi,
+    }),
+    [habits, focusSec, running, toggleTimer, supplementsApi, nutritionApi],
+  )
+
   return (
     <div className="trPage">
       <section className="trHero">
@@ -1808,7 +2018,7 @@ export default function TrainingPage({ habits, supplementsApi, nutritionApi }) {
           <h1 className="trHeroTitle">
             Antrenman &amp; <span className="trHeroAccent">odak</span>
           </h1>
-          <p className="trHeroSub">Disiplini parçalara ayır: spor, takviye, kalori. Tek panel, tek ritim.</p>
+          <p className="trHeroSub">Özet burada; detaylar için alt rotalar. Spor, takviye, kalori ayrı URL’lerde.</p>
         </div>
         <div className="trHeroStats">
           <div className="trHeroStat">
@@ -1828,65 +2038,85 @@ export default function TrainingPage({ habits, supplementsApi, nutritionApi }) {
         </div>
       </section>
 
-      <div className="trTabs">
-        <button type="button" className={mode === 'workout' ? 'trTab trTabOn' : 'trTab'} onClick={() => setMode('workout')}>
-          Spor Log
-        </button>
-        <button type="button" className={mode === 'supplements' ? 'trTab trTabOn' : 'trTab'} onClick={() => setMode('supplements')}>
+      <div className="trTabs" role="navigation" aria-label="Antrenman bölümleri">
+        <NavLink to="/training" end className={trTabClass}>
+          Özet
+        </NavLink>
+        <NavLink to="/training/log" className={trTabClass}>
+          Spor log
+        </NavLink>
+        <NavLink to="/training/supplements" className={trTabClass}>
           Takviyeler
-        </button>
-        <button type="button" className={mode === 'nutrition' ? 'trTab trTabOn' : 'trTab'} onClick={() => setMode('nutrition')}>
+        </NavLink>
+        <NavLink to="/training/nutrition" className={trTabClass}>
           Kalori
-        </button>
+        </NavLink>
       </div>
 
-      {mode === 'workout' ? <WorkoutPanel habits={habits} focusSec={focusSec} running={running} onToggleTimer={toggleTimer} /> : null}
-      {mode === 'supplements' ? (supplementsApi ? <SupplementsPanel api={supplementsApi} /> : <div className="trEmpty">Takviye verisi için oturum gerekli.</div>) : null}
-      {mode === 'nutrition' ? (nutritionApi ? <NutritionPanel api={nutritionApi} /> : <div className="trEmpty">Kalori verisi için oturum gerekli.</div>) : null}
+      <Outlet context={outletContext} />
 
       <div className="trWide">
         <div className="trWideCard trWideGraph">
-          <span className="trWideK">Hacim grafiği</span>
+          <span className="trWideK">Hacim (son 7 gün)</span>
           <h3>
-            Hipertrofi
+            Yerel
             <br />
-            ilerlemesi
+            günlük
           </h3>
           <div className="trBars" aria-hidden="true">
-            {[25, 50, 75, 40, 60, 100, 80].map((h, i) => (
-              <div key={i} className="trBar" style={{ height: `${h}%` }} />
+            {volumeSeries7.map((vol, i) => (
+              <div
+                key={i}
+                className="trBar"
+                style={{ height: `${Math.round((vol / maxVolBar) * 100)}%` }}
+              />
             ))}
           </div>
         </div>
         <div className="trWideCard">
-          <span className="trWideK">Zihinsel disiplin</span>
+          <span className="trWideK">Protokol disiplini</span>
           <h3>
-            Stoik
+            Son 21
             <br />
-            ısı haritası
+            gün
           </h3>
           <div className="trMiniHeat" aria-hidden="true">
-            {Array.from({ length: 21 }).map((_, i) => (
-              <span key={i} className={i % 3 === 0 ? 'trMH1' : i % 2 === 0 ? 'trMH2' : 'trMH0'} />
-            ))}
+            {disciplineHeat21.map((pct, i) => {
+              const c =
+                pct >= 0.85 ? 'trMH1' : pct >= 0.5 ? 'trMH2' : pct > 0 ? 'trMH0' : 'trMH0'
+              return <span key={i} className={c} />
+            })}
           </div>
         </div>
         <div className="trWideCard trWideMetrics">
-          <span className="trWideK">Komuta konsolu</span>
+          <span className="trWideK">Özet</span>
           <h3>
-            Sistem
+            Bugün &
             <br />
-            metrikleri
+            hesap
           </h3>
           <ul className="trMetricList">
             <li>
-              <span>Ort. uyku</span> <b>7s 42dk</b>
-            </li>
-            <li>
-              <span>Protein hedefi</span> <b className="trMetricHi">185/200g</b>
-            </li>
-            <li>
               <span>Aktif seri</span> <b>{streak} gün</b>
+            </li>
+            <li>
+              <span>Protokol sayısı</span> <b>{habits?.length ?? 0}</b>
+            </li>
+            <li>
+              <span>Bugün kalori</span>{' '}
+              <b className="trMetricHi">
+                {todayNutrition && Number.isFinite(Number(todayNutrition.calories))
+                  ? `${Math.round(Number(todayNutrition.calories))} kcal`
+                  : '—'}
+              </b>
+            </li>
+            <li>
+              <span>Protein (bugün)</span>{' '}
+              <b>
+                {todayNutrition?.protein_g != null && todayNutrition.protein_g !== ''
+                  ? `${todayNutrition.protein_g} g`
+                  : '—'}
+              </b>
             </li>
           </ul>
         </div>

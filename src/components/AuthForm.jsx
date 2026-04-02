@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient.js'
 
-export default function AuthForm({ onDone }) {
-  const [mode, setMode] = useState('signin') // signin | signup
+export default function AuthForm({ onDone, initialMode = 'signin' }) {
+  const [mode, setMode] = useState(initialMode === 'signup' ? 'signup' : 'signin') // signin | signup
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -49,7 +50,10 @@ export default function AuthForm({ onDone }) {
     <div className="authCard">
       <h2 className="authTitle">{title}</h2>
       <p className="authSubtitle muted">
-        Cihazlar arası senkron için hesabınla giriş yap.
+        Cihazlar arası senkron için hesabınla giriş yap.{' '}
+        <Link to="/" className="textButton">
+          Ürünü keşfet
+        </Link>
       </p>
 
       <form className="authForm" onSubmit={submit}>
